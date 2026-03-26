@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CollageStudio — Antalis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --border: #e8e4de;
+  --text: #1c1c1e;
+  --text-muted: #9e9a94;
+  --accent: #1c1c1e;
+  --accent-hover: #3a3835;
+  --tag-bg: #fff3e0;
+  --tag-color: #c45000;
+  --kpi-val: #1c1c1e;
+  --sidebar: #1c1c1e;
+  --sidebar-text: #e5e0d8;
+  --sidebar-muted: #6e6a64;
+  --sidebar-border: #2e2e30;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+}
+
+body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 280px; min-width: 280px; background: var(--sidebar);
+  height: 100vh; position: sticky; top: 0;
+  padding: 2rem 1.5rem; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0;
+}
+
+.sidebar-logo {
+  font-size: 1.1rem; font-weight: 600; color: #fff;
+  letter-spacing: -0.01em; margin-bottom: 2rem;
+}
+.sidebar-logo span { color: var(--tag-color); }
+
+.sidebar-section { margin-bottom: 1.6rem; }
+.sidebar-label {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--sidebar-muted);
+  margin-bottom: 0.6rem; display: block;
+}
+
+.sidebar select, .sidebar input[type="number"], .sidebar input[type="range"] {
+  width: 100%; background: #2a2a2c; border: 1px solid #3a3a3c;
+  color: var(--sidebar-text); border-radius: 8px;
+  padding: 0.55rem 0.75rem; font-family: 'Poppins', sans-serif;
+  font-size: 0.82rem; outline: none; appearance: none;
+}
+.sidebar select:focus, .sidebar input:focus { border-color: #666; }
+.sidebar input[type="range"] { padding: 0.3rem 0; background: transparent; border: none; accent-color: #c8b89a; }
+
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+
+.sidebar-divider { border: none; border-top: 1px solid var(--sidebar-border); margin: 1.2rem 0; }
+
+.kpi-mini {
+  background: #252527; border: 1px solid #333;
+  border-radius: 10px; padding: 0.8rem; text-align: center; margin-bottom: 0.5rem;
+}
+.kpi-mini .val { font-size: 0.95rem; font-weight: 600; color: #c8b89a; word-break: break-all; }
+.kpi-mini .lbl { font-size: 0.65rem; color: var(--sidebar-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.2rem; }
+
+.slider-val { text-align: right; font-size: 0.75rem; color: #c8b89a; margin-top: 0.2rem; }
+
+/* ── Main ── */
+.main { flex: 1; padding: 2.5rem 2rem; overflow-y: auto; max-width: 1100px; }
+
+.hero { margin-bottom: 2rem; }
+.hero h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
+.hero p { font-size: 0.85rem; color: var(--text-muted); font-weight: 300; margin-top: 0.25rem; }
+
+/* Banner info card */
+.banner-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.2rem 1.4rem;
+  margin-bottom: 1.5rem; display: none;
+}
+.banner-card.visible { display: block; }
+.banner-card-title { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.6rem; }
+.tag { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.72rem; font-weight: 500; margin: 0.15rem; }
+.tag-orange { background: var(--tag-bg); color: var(--tag-color); }
+.tag-gray { background: #f0ede8; color: #6b6560; }
+.tag-blue { background: #e8f0fe; color: #1a56db; }
+
+/* Drop zone */
+.dropzone {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  background: var(--surface); padding: 3rem 2rem;
+  text-align: center; cursor: pointer; transition: all 0.2s;
+  margin-bottom: 1.5rem; position: relative;
+}
+.dropzone:hover, .dropzone.dragover { border-color: #999; background: #faf9f7; }
+.dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.dropzone-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.dropzone-title { font-size: 0.95rem; font-weight: 500; color: var(--text); margin-bottom: 0.3rem; }
+.dropzone-sub { font-size: 0.78rem; color: var(--text-muted); font-weight: 300; }
+
+/* Stats row */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; }
+.stat-card .val { font-size: 1.5rem; font-weight: 600; color: var(--kpi-val); }
+.stat-card .lbl { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.2rem; }
+
+/* Thumbnails */
+.thumbs-wrap { display: none; margin-bottom: 1.5rem; }
+.thumbs-wrap.visible { display: block; }
+.thumbs-title { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem; }
+.thumbs-grid { display: flex; flex-wrap: wrap; gap: 8px; max-height: 180px; overflow-y: auto; padding: 4px 0; }
+.thumb-wrap { position: relative; flex-shrink: 0; }
+.thumb { width: 72px; height: 54px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); display: block; transition: opacity 0.2s; }
+.thumb-wrap:hover .thumb { opacity: 0.6; }
+.thumb-del {
+  position: absolute; top: -5px; right: -5px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #ec008c; color: #fff; border: none; cursor: pointer;
+  font-size: 10px; font-weight: 700; line-height: 18px; text-align: center;
+  display: none; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.thumb-wrap:hover .thumb-del { display: flex; }
+.thumbs-title { display: flex; align-items: center; justify-content: space-between; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem; }
+.thumbs-clear { font-size: 0.7rem; color: #ec008c; cursor: pointer; font-weight: 500; text-transform: none; letter-spacing: 0; border: none; background: none; padding: 0; }
+.thumbs-clear:hover { text-decoration: underline; }
+
+/* Buttons */
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
+.btn {
+  padding: 0.7rem 1.2rem; border-radius: 10px; font-family: 'Poppins', sans-serif;
+  font-size: 0.84rem; font-weight: 500; cursor: pointer; border: none;
+  transition: all 0.18s; display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { background: #d4d0ca; color: #fff; cursor: not-allowed; }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1.5px solid var(--border); }
+.btn-secondary:hover { border-color: #999; }
+.btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Preview */
+.preview-wrap { display: none; }
+.preview-wrap.visible { display: block; }
+.preview-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.2rem; margin-bottom: 1rem;
+}
+.preview-card canvas { width: 100%; height: auto; display: block; border-radius: 8px; }
+.info-box {
+  background: #f0ede8; border-radius: 10px; padding: 0.8rem 1rem;
+  font-size: 0.78rem; color: #6b6560; line-height: 1.8;
+}
+.info-box strong { color: var(--text); }
+
+/* Progress */
+.progress-wrap { display: none; margin-bottom: 1rem; }
+.progress-wrap.visible { display: flex; align-items: center; gap: 0.75rem; }
+.progress-bar-bg { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.progress-bar { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.1s; width: 0%; }
+.progress-label { font-size: 0.75rem; color: var(--text-muted); min-width: 80px; text-align: right; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 2rem; right: 2rem; background: #1c1c1e; color: #fff;
+  padding: 0.75rem 1.2rem; border-radius: 10px; font-size: 0.82rem;
+  transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 9999;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: relative; padding: 1.2rem; }
+  .main { padding: 1.2rem; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .btn-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">Collage<span>Studio</span></div>
+
+  <div class="sidebar-section">
+    <span class="sidebar-label">Mode</span>
+    <select id="bannerType">
+      <option value="">— Collage libre (ratios mixtes) —</option>
+      <optgroup label="── Bannières Antalis ──">
+        <option value="endeca">Endeca (1330×166px)</option>
+        <option value="jahia_eshop">Jahia E-Shop (1254×360px)</option>
+        <option value="jahia_inspi">Jahia Inspiration (1920×493px)</option>
+        <option value="eloqua">Eloqua (600×250px)</option>
+        <option value="mdm">MDM (800×529px)</option>
+        <option value="eshop_produit">Eshop Produit (1100×1100px)</option>
+      </optgroup>
+      <optgroup label="── Carré ──">
+        <option value="ratio_1_1">Carré 1:1</option>
+      </optgroup>
+      <optgroup label="── Paysage ──">
+        <option value="ratio_5_4">Paysage 5:4</option>
+        <option value="ratio_4_3">Paysage 4:3</option>
+        <option value="ratio_3_2">Paysage 3:2</option>
+        <option value="ratio_5_3">Paysage 5:3</option>
+        <option value="ratio_16_10">Paysage 16:10</option>
+        <option value="ratio_16_9">Paysage 16:9</option>
+        <option value="ratio_2_1">Paysage 2:1</option>
+        <option value="ratio_21_9">Ultrawide 21:9</option>
+        <option value="ratio_32_9">Ultrawide 32:9</option>
+      </optgroup>
+      <optgroup label="── Portrait ──">
+        <option value="ratio_4_5">Portrait 4:5</option>
+        <option value="ratio_3_4">Portrait 3:4</option>
+        <option value="ratio_2_3">Portrait 2:3</option>
+        <option value="ratio_9_16">Portrait 9:16</option>
+        <option value="ratio_1_2">Portrait 1:2</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div class="sidebar-section">
+    <span class="sidebar-label">Format de sortie</span>
+    <select id="unite" onchange="updateUnite()">
+      <option value="cm">Centimètres (cm)</option>
+      <option value="mm">Millimètres (mm)</option>
+      <option value="in">Pouces (in)</option>
+      <option value="px">Pixels (px)</option>
+    </select>
+  </div>
+
+  <div class="sidebar-section row-2">
+    <div>
+      <span class="sidebar-label">Largeur</span>
+      <input type="number" id="width" value="60" step="0.5" min="1">
+    </div>
+    <div>
+      <span class="sidebar-label">Hauteur</span>
+      <input type="number" id="height" value="80" step="0.5" min="1">
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <span class="sidebar-label">Résolution (DPI)</span>
+    <select id="dpi" onchange="updateKPI()">
+      <option value="72">72 DPI — Web</option>
+      <option value="96">96 DPI — Écran</option>
+      <option value="150" selected>150 DPI — Présentation</option>
+      <option value="300">300 DPI — Impression</option>
+    </select>
+  </div>
+
+  <div class="sidebar-section" id="section-libre">
+    <span class="sidebar-label">Rangées</span>
+    <input type="range" id="rangees" min="1" max="30" value="5" oninput="document.getElementById('rangeesVal').textContent=this.value; updateKPI()">
+    <div class="slider-val"><span id="rangeesVal">5</span> rangées</div>
+  </div>
+
+  <!-- Colonnes : bannière/ratio uniquement -->
+  <div class="sidebar-section" id="section-banner" style="display:none">
+    <span class="sidebar-label">Colonnes</span>
+    <input type="range" id="cols" min="1" max="6" value="2" oninput="document.getElementById('colsVal').textContent=this.value; updateKPI(); if(getBanner()) updateBannerCanvas()">
+    <div class="slider-val"><span id="colsVal">2</span> colonnes</div>
+  </div>
+
+  <!-- Options communes : toujours visibles -->
+  <div class="sidebar-section" id="section-options">
+    <span class="sidebar-label">Espacement (px)</span>
+    <input type="range" id="gapU" min="0" max="40" value="0" oninput="document.getElementById('gapUval').textContent=this.value; if(getBanner()) updateBannerCanvas()">
+    <div class="slider-val"><span id="gapUval">0</span> px</div>
+    <span class="sidebar-label" style="margin-top:0.8rem">Couleur fond</span>
+    <select id="gapColorU">
+      <option value="#ffffff">Blanc</option>
+      <option value="#f0ede8">Crème</option>
+      <option value="#e0e0e0">Gris clair</option>
+      <option value="#1c1c1e">Noir</option>
+      <option value="#ec008c">Magenta Antalis</option>
+      <option value="#25223f">Gris foncé Antalis</option>
+    </select>
+    <span class="sidebar-label" style="margin-top:0.8rem">Numérotation</span>
+    <div style="display:flex; gap:0.5rem; margin-top:0.2rem">
+      <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.8rem;color:#9e9a94">
+        <input type="radio" name="numU" id="numUoff" value="off" checked style="accent-color:#c8b89a"> Non
+      </label>
+      <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;font-size:0.8rem;color:#9e9a94">
+        <input type="radio" name="numU" id="numUon" value="on" style="accent-color:#c8b89a"> Oui
+      </label>
+    </div>
+    <div id="numUopts" style="display:none; margin-top:0.5rem">
+      <span class="sidebar-label">Position</span>
+      <select id="numUpos">
+        <option value="tl">Haut gauche</option>
+        <option value="tr">Haut droite</option>
+        <option value="bl">Bas gauche</option>
+        <option value="br" selected>Bas droite</option>
+        <option value="center">Centre</option>
+      </select>
+      <span class="sidebar-label" style="margin-top:0.5rem">Style</span>
+      <select id="numUstyle">
+        <option value="white" selected>Blanc / Magenta</option>
+        <option value="magenta">Magenta / Blanc</option>
+        <option value="outline">Contour Magenta</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sidebar-section" id="section-seed">
+    <span class="sidebar-label">Variante</span>
+    <input type="range" id="seed" min="0" max="99" value="42" oninput="document.getElementById('seedVal').textContent=this.value">
+    <div class="slider-val">seed <span id="seedVal">42</span></div>
+  </div>
+
+  <div class="sidebar-section">
+    <span class="sidebar-label">Qualité export</span>
+    <input type="range" id="qualite" min="70" max="100" value="92" oninput="document.getElementById('qualiteVal').textContent=this.value+'%'">
+    <div class="slider-val"><span id="qualiteVal">92%</span></div>
+  </div>
+
+  <hr class="sidebar-divider">
+
+  <div class="kpi-mini">
+    <div class="val" id="kpiPx">–</div>
+    <div class="lbl">pixels · <span id="kpiMpx">–</span> Mpx</div>
+  </div>
+  <div class="kpi-mini">
+    <div class="val" id="kpiFormat">–</div>
+    <div class="lbl">format final · <span id="kpiDpi">150</span> DPI</div>
+  </div>
+
+  <hr class="sidebar-divider">
+
+  <div class="sidebar-section">
+    <span class="sidebar-label">🔍 Détecter le ratio</span>
+    <label id="ratioDropLabel" style="
+      display:flex; align-items:center; justify-content:center;
+      gap:0.5rem; background:#2a2a2c; border:1.5px dashed #444;
+      border-radius:8px; padding:0.65rem; cursor:pointer;
+      font-size:0.78rem; color:#9e9a94; transition:border-color 0.2s;
+      margin-bottom:0.5rem;" 
+      ondragover="event.preventDefault();this.style.borderColor='#c8b89a'"
+      ondragleave="this.style.borderColor='#444'"
+      ondrop="handleRatioDrop(event)">
+      <input type="file" id="ratioFile" accept="image/*" style="display:none" onchange="if(typeof detectRatio==='function') detectRatio(this.files[0])">
+      <span>📎</span> <span>Glisse ou clique</span>
+    </label>
+    <div id="ratioResult" style="display:none">
+      <div class="kpi-mini" style="margin-bottom:0.4rem">
+        <div class="val" id="ratioExact" style="font-size:1.1rem">–</div>
+        <div class="lbl">dimensions réelles</div>
+      </div>
+      <div class="kpi-mini" style="margin-bottom:0.4rem">
+        <div class="val" id="ratioNearest" style="font-size:1.3rem; color:#c8b89a">–</div>
+        <div class="lbl">ratio le plus proche</div>
+      </div>
+      <div id="ratioApply" style="margin-top:0.4rem"></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <div class="hero">
+    <h1>CollageStudio</h1>
+    <p>Génération de planches visuelles haute résolution · Antalis</p>
+  </div>
+
+  <!-- Banner info -->
+  <div class="banner-card" id="bannerCard">
+    <div class="banner-card-title">Mode bannière actif</div>
+    <div id="bannerTags"></div>
+  </div>
+
+  <!-- Dropzone -->
+  <div class="dropzone" id="dropzone">
+    <input type="file" id="fileInput" accept="image/*" multiple>
+    <div class="dropzone-icon">🖼</div>
+    <div class="dropzone-title">Glisse tes visuels ici</div>
+    <div class="dropzone-sub">JPG · PNG · WEBP · Sélection multiple acceptée</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="statsRow" style="display:none">
+    <div class="stat-card"><div class="val" id="sNb">0</div><div class="lbl">visuels</div></div>
+    <div class="stat-card"><div class="val" id="sRows">–</div><div class="lbl" id="sRowsLbl">rangées</div></div>
+    <div class="stat-card"><div class="val" id="sCols">–</div><div class="lbl" id="sColsLbl">par rangée</div></div>
+    <div class="stat-card"><div class="val" id="sFormat">–</div><div class="lbl">format</div></div>
+  </div>
+
+  <!-- Thumbnails -->
+  <div class="thumbs-wrap" id="thumbsWrap">
+    <div class="thumbs-title">
+      <span>Visuels chargés</span>
+      <button class="thumbs-clear" onclick="clearAllImages()">✕ Tout supprimer</button>
+    </div>
+    <div class="thumbs-grid" id="thumbsGrid"></div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row" id="btnRow" style="display:none">
+    <button class="btn btn-secondary" id="btnPreview" onclick="genererPreview()">🔍 Aperçu rapide</button>
+    <button class="btn btn-primary" id="btnExport" onclick="genererExport()">⬇️ Générer & télécharger HD</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel">0%</div>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview-wrap" id="previewWrap">
+    <div class="preview-card">
+      <canvas id="previewCanvas"></canvas>
+    </div>
+    <div class="info-box" id="infoBox"></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Données bannières ────────────────────────────────────────────────────────
+const BANNERS = {
+  // ── Bannières Antalis ──────────────────────────────────────────────────
+  endeca:       { w:1330, h:166,  cols:2, label:"Endeca",           desc:"1330×166px",  group:"banner" },
+  jahia_eshop:  { w:1254, h:360,  cols:2, label:"Jahia E-Shop",     desc:"1254×360px",  group:"banner" },
+  jahia_inspi:  { w:1920, h:493,  cols:1, label:"Jahia Inspiration",desc:"1920×493px",  group:"banner" },
+  eloqua:       { w:600,  h:250,  cols:3, label:"Eloqua",           desc:"600×250px",   group:"banner" },
+  mdm:          { w:800,  h:529,  cols:3, label:"MDM",              desc:"800×529px",   group:"banner" },
+  eshop_produit:{ w:1100, h:1100, cols:4, label:"Eshop Produit",    desc:"1100×1100px", group:"banner" },
+  // ── Ratios standard ───────────────────────────────────────────────────
+  ratio_1_1:    { ratio:1,      cols:4, label:"Carré 1:1",           desc:"ex. 1000×1000", group:"ratio" },
+  ratio_5_4:    { ratio:5/4,    cols:4, label:"Paysage 5:4",         desc:"ex. 1250×1000", group:"ratio" },
+  ratio_4_3:    { ratio:4/3,    cols:3, label:"Paysage 4:3",         desc:"ex. 1600×1200", group:"ratio" },
+  ratio_3_2:    { ratio:3/2,    cols:3, label:"Paysage 3:2",         desc:"ex. 1500×1000", group:"ratio" },
+  ratio_5_3:    { ratio:5/3,    cols:3, label:"Paysage 5:3",         desc:"ex. 1500×900",  group:"ratio" },
+  ratio_16_10:  { ratio:16/10,  cols:3, label:"Paysage 16:10",       desc:"ex. 1920×1200", group:"ratio" },
+  ratio_16_9:   { ratio:16/9,   cols:3, label:"Paysage 16:9",        desc:"ex. 1920×1080", group:"ratio" },
+  ratio_2_1:    { ratio:2/1,    cols:3, label:"Paysage 2:1",         desc:"ex. 2000×1000", group:"ratio" },
+  ratio_21_9:   { ratio:21/9,   cols:2, label:"Ultrawide 21:9",      desc:"ex. 2520×1080", group:"ratio" },
+  ratio_32_9:   { ratio:32/9,   cols:2, label:"Ultrawide 32:9",      desc:"ex. 3840×1080", group:"ratio" },
+  ratio_4_5:    { ratio:4/5,    cols:4, label:"Portrait 4:5",        desc:"ex. 1080×1350", group:"ratio" },
+  ratio_3_4:    { ratio:3/4,    cols:4, label:"Portrait 3:4",        desc:"ex. 1200×1600", group:"ratio" },
+  ratio_2_3:    { ratio:2/3,    cols:4, label:"Portrait 2:3",        desc:"ex. 1000×1500", group:"ratio" },
+  ratio_9_16:   { ratio:9/16,   cols:4, label:"Portrait 9:16",       desc:"ex. 1080×1920", group:"ratio" },
+  ratio_1_2:    { ratio:1/2,    cols:5, label:"Portrait 1:2",        desc:"ex. 600×1200",  group:"ratio" },
+};
+
+let loadedImages = [];   // { img: HTMLImageElement, name, ratio }
+let lastCanvas = null;
+
+// ── Utilitaires ──────────────────────────────────────────────────────────────
+function getDPI()    { return parseInt(document.getElementById('dpi').value); }
+function getUnite()  { return document.getElementById('unite').value; }
+function getRangees(){ return parseInt(document.getElementById('rangees').value); }
+function getCols()   { return parseInt(document.getElementById('cols').value); }
+function getGap()    { return parseInt(document.getElementById('gapU')?.value || 0); }
+function getSeed()   { return parseInt(document.getElementById('seed').value); }
+function getQualite(){ return parseInt(document.getElementById('qualite').value) / 100; }
+function getBanner() { const v = document.getElementById('bannerType').value; return v ? BANNERS[v] : null; }
+
+function toPixels(val, unite, dpi) {
+  if (unite === 'px') return Math.round(val);
+  if (unite === 'cm') return Math.round(val / 2.54 * dpi);
+  if (unite === 'mm') return Math.round(val / 25.4 * dpi);
+  if (unite === 'in') return Math.round(val * dpi);
+  return Math.round(val);
+}
+
+function formatDim(wpx, hpx, dpi, unite) {
+  if (unite === 'px') return `${wpx}×${hpx}px`;
+  if (unite === 'cm') return `${(wpx/dpi*2.54).toFixed(1)}×${(hpx/dpi*2.54).toFixed(1)} cm`;
+  if (unite === 'mm') return `${(wpx/dpi*25.4).toFixed(0)}×${(hpx/dpi*25.4).toFixed(0)} mm`;
+  if (unite === 'in') return `${(wpx/dpi).toFixed(2)}×${(hpx/dpi).toFixed(2)} in`;
+}
+
+function getWH() {
+  const b = getBanner();
+  if (b) {
+    const cols = getCols();
+    const n = Math.max(loadedImages.length, 1);
+    const rows = Math.ceil(n / cols);
+    const gap = getGap();
+    if (b.group === 'ratio') {
+      // Mode ratio : cellule de base 400px de hauteur, largeur selon ratio
+      const cellH = 400;
+      const cellW = Math.round(cellH * b.ratio);
+      return {
+        W: cellW * cols + gap * (cols - 1),
+        H: cellH * rows + gap * (rows - 1)
+      };
+    } else {
+      // Mode bannière : pixel-perfect sur dimensions source
+      return {
+        W: b.w * cols + gap * (cols - 1),
+        H: b.h * rows + gap * (rows - 1)
+      };
+    }
+  }
+  const dpi = getDPI(), u = getUnite();
+  const wv = parseFloat(document.getElementById('width').value) || 60;
+  const hv = parseFloat(document.getElementById('height').value) || 80;
+  return { W: toPixels(wv, u, dpi), H: toPixels(hv, u, dpi) };
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = label;
+  document.getElementById('progressWrap').classList.toggle('visible', pct > 0 && pct < 100);
+}
+
+// ── KPI sidebar ──────────────────────────────────────────────────────────────
+function updateKPI() {
+  const {W, H} = getWH();
+  const mpx = (W * H / 1e6).toFixed(1);
+  document.getElementById('kpiPx').textContent = `${W.toLocaleString()}×${H.toLocaleString()}`;
+  document.getElementById('kpiMpx').textContent = mpx;
+  document.getElementById('kpiFormat').textContent = formatDim(W, H, getDPI(), getUnite());
+  document.getElementById('kpiDpi').textContent = getDPI();
+  updateStats();
+}
+
+function updateUnite() {
+  // Garde les dimensions en cm et reconvertit selon la nouvelle unité
+  updateKPI();
+}
+
+// ── Banner mode ───────────────────────────────────────────────────────────────
+
+function updateBannerCanvas() {
+  const b = getBanner();
+  if (!b) return;
+  const cols = getCols();
+  const n = Math.max(loadedImages.length, 1);
+  const rows = Math.ceil(n / cols);
+  const gap = getGap();
+
+  let Wpx, Hpx;
+  if (b.group === 'ratio') {
+    // Mode ratio : cellule 400px de hauteur, largeur selon ratio
+    const cellH = 400;
+    const cellW = Math.round(cellH * b.ratio);
+    Wpx = cellW * cols + gap * (cols - 1);
+    Hpx = cellH * rows + gap * (rows - 1);
+  } else {
+    // Mode bannière : pixel-perfect sur dimensions source
+    Wpx = b.w * cols + gap * (cols - 1);
+    Hpx = b.h * rows + gap * (rows - 1);
+  }
+
+  const u = getUnite(), dpi = getDPI();
+  let wVal, hVal;
+  if (u === 'px') { wVal = Wpx; hVal = Hpx; }
+  else if (u === 'cm') { wVal = (Wpx / 96 * 2.54).toFixed(1); hVal = (Hpx / 96 * 2.54).toFixed(1); }
+  else if (u === 'mm') { wVal = (Wpx / 96 * 25.4).toFixed(0); hVal = (Hpx / 96 * 25.4).toFixed(0); }
+  else if (u === 'in') { wVal = (Wpx / 96).toFixed(2); hVal = (Hpx / 96).toFixed(2); }
+
+  document.getElementById('width').value = wVal;
+  document.getElementById('height').value = hVal;
+
+  // Mettre à jour les KPI directement en pixels (pas de conversion DPI)
+  const mpx = (Wpx * Hpx / 1e6).toFixed(1);
+  document.getElementById('kpiPx').textContent = `${Wpx.toLocaleString()}×${Hpx.toLocaleString()}`;
+  document.getElementById('kpiMpx').textContent = mpx;
+  document.getElementById('kpiFormat').textContent = `${Wpx}×${Hpx} px`;
+  document.getElementById('kpiDpi').textContent = '96 (écran)';
+
+  // Info tags
+  const ratioLabel = b.group === 'ratio'
+    ? b.ratio.toFixed(2)
+    : (b.w/b.h).toFixed(2);
+  document.getElementById('bannerTags').innerHTML = `
+    <span class="tag tag-orange">${b.label}</span>
+    <span class="tag tag-gray">${b.desc}</span>
+    <span class="tag tag-gray">Ratio : ${ratioLabel}</span>
+    <span class="tag tag-blue">${cols} col. × ${rows} rangées</span>
+    <span class="tag tag-blue">→ ${Wpx}×${Hpx} px</span>
+  `;
+}
+
+document.getElementById('bannerType').addEventListener('change', function() {
+  const b = getBanner();
+  const card = document.getElementById('bannerCard');
+  const secLibre = document.getElementById('section-libre');
+  const secBanner = document.getElementById('section-banner');
+  const secSeed = document.getElementById('section-seed');
+
+  if (b) {
+    card.classList.add('visible');
+    secLibre.style.display = 'none';
+    secBanner.style.display = 'block';
+    secSeed.style.display = 'none';
+    document.getElementById('cols').value = b.cols;
+    document.getElementById('colsVal').textContent = b.cols;
+    updateBannerCanvas();
+  } else {
+    card.classList.remove('visible');
+    secLibre.style.display = 'block';
+    secBanner.style.display = 'none';
+    secSeed.style.display = 'block';
+  }
+  updateStats();
+  updateKPI();
+});
+
+// ── Chargement fichiers ───────────────────────────────────────────────────────
+function handleFiles(files) {
+  loadedImages = [];
+  const grid = document.getElementById('thumbsGrid');
+  grid.innerHTML = '';
+  let loaded = 0;
+
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const idx = loadedImages.length;
+        loadedImages.push({ img, name: file.name, ratio: img.naturalWidth / img.naturalHeight, src: e.target.result });
+        const wrap = document.createElement('div');
+        wrap.className = 'thumb-wrap';
+        wrap.dataset.idx = idx;
+        const thumb = document.createElement('img');
+        thumb.src = e.target.result;
+        thumb.className = 'thumb';
+        thumb.title = file.name;
+        const del = document.createElement('button');
+        del.className = 'thumb-del';
+        del.textContent = '✕';
+        del.title = 'Supprimer';
+        del.onclick = () => removeImage(parseInt(wrap.dataset.idx));
+        wrap.appendChild(thumb);
+        wrap.appendChild(del);
+        grid.appendChild(wrap);
+        loaded++;
+        if (loaded === files.length || loaded === loadedImages.length) onImagesReady();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeImage(idx) {
+  loadedImages.splice(idx, 1);
+  rebuildThumbs();
+  if (!loadedImages.length) {
+    document.getElementById('statsRow').style.display = 'none';
+    document.getElementById('thumbsWrap').classList.remove('visible');
+    document.getElementById('btnRow').style.display = 'none';
+  } else {
+    updateStats();
+    if (getBanner()) updateBannerCanvas();
+    document.getElementById('sNb').textContent = loadedImages.length;
+  }
+  toast(loadedImages.length + ' visuel(s) restant(s)');
+}
+
+function clearAllImages() {
+  loadedImages = [];
+  document.getElementById('thumbsGrid').innerHTML = '';
+  document.getElementById('statsRow').style.display = 'none';
+  document.getElementById('thumbsWrap').classList.remove('visible');
+  document.getElementById('btnRow').style.display = 'none';
+  document.getElementById('previewWrap').classList.remove('visible');
+  document.getElementById('fileInput').value = '';
+  toast('Visuels supprimés');
+}
+
+function rebuildThumbs() {
+  const grid = document.getElementById('thumbsGrid');
+  grid.innerHTML = '';
+  loadedImages.forEach((o, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'thumb-wrap';
+    wrap.dataset.idx = i;
+    const thumb = document.createElement('img');
+    thumb.src = o.src;
+    thumb.className = 'thumb';
+    thumb.title = o.name;
+    const del = document.createElement('button');
+    del.className = 'thumb-del';
+    del.textContent = '✕';
+    del.onclick = () => removeImage(parseInt(wrap.dataset.idx));
+    wrap.appendChild(thumb);
+    wrap.appendChild(del);
+    grid.appendChild(wrap);
+  });
+}
+
+function onImagesReady() {
+  const n = loadedImages.length;
+  if (!n) return;
+  document.getElementById('statsRow').style.display = 'grid';
+  document.getElementById('thumbsWrap').classList.add('visible');
+  document.getElementById('btnRow').style.display = 'grid';
+  document.getElementById('sNb').textContent = n;
+  updateStats();
+  if (getBanner()) updateBannerCanvas(); // recalcul rows après chargement
+}
+
+function updateStats() {
+  const n = loadedImages.length; if (!n) return;
+  const b = getBanner();
+  const {W, H} = getWH();
+  if (b) {
+    const c = getCols();
+    const rows = Math.ceil(n / c);
+    document.getElementById('sRows').textContent = rows;
+    document.getElementById('sCols').textContent = c;
+    document.getElementById('sRowsLbl').textContent = 'rangées auto';
+    document.getElementById('sColsLbl').textContent = 'colonnes';
+  } else {
+    const r = getRangees();
+    document.getElementById('sRows').textContent = r;
+    document.getElementById('sCols').textContent = Math.ceil(n / r);
+    document.getElementById('sRowsLbl').textContent = 'rangées';
+    document.getElementById('sColsLbl').textContent = 'par rangée';
+  }
+  document.getElementById('sFormat').textContent = formatDim(W, H, getDPI(), getUnite());
+}
+
+document.getElementById('fileInput').addEventListener('change', e => handleFiles(e.target.files));
+
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+
+// ── Algo collage libre (port exact du Python) ─────────────────────────────────
+class SeededRandom {
+  constructor(seed) { this.s = seed % 2147483647; if (this.s <= 0) this.s += 2147483646; }
+  next() { this.s = this.s * 16807 % 2147483647; return (this.s - 1) / 2147483646; }
+  shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(this.next() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+}
+
+function largestRemainder(valsF, total) {
+  const vi = valsF.map(Math.floor);
+  const restes = valsF.map((v, i) => [v - Math.floor(v), i]).sort((a,b) => b[0]-a[0]);
+  let deficit = total - vi.reduce((a,b) => a+b, 0);
+  for (let i = 0; i < deficit; i++) vi[restes[i][1]]++;
+  return vi;
+}
+
+function repartirEquilibre(ratios, nbRangees, seed) {
+  const rng = new SeededRandom(seed);
+  let ordre = ratios.map((_, i) => i);
+  rng.shuffle(ordre);
+  ordre.sort((a, b) => ratios[a] - ratios[b]);
+
+  const rangees = Array.from({length: nbRangees}, () => []);
+  const sommes = new Array(nbRangees).fill(0);
+  for (const idx of ordre) {
+    const r = sommes.indexOf(Math.min(...sommes));
+    rangees[r].push(idx);
+    sommes[r] += ratios[idx];
+  }
+  rangees.forEach(r => rng.shuffle(r));
+  rng.shuffle(rangees);
+  return rangees;
+}
+
+function calculerGrille(rangees, ratios, W, H) {
+  let hf = rangees.map(r => W / Math.max(r.reduce((s,i) => s+ratios[i], 0), 0.001));
+  const sumHf = hf.reduce((a,b) => a+b, 0);
+  hf = hf.map(h => h * H / sumHf);
+  const hauteurs = largestRemainder(hf, H);
+
+  const largeurs_g = rangees.map((r, ri) => {
+    const h = hauteurs[ri];
+    let lf = r.map(i => ratios[i] * h);
+    const sumLf = lf.reduce((a,b)=>a+b, 0);
+    lf = lf.map(w => w * W / Math.max(sumLf, 1));
+    return largestRemainder(lf, W);
+  });
+  return { hauteurs, largeurs_g };
+}
+
+// ── Dessin canvas ─────────────────────────────────────────────────────────────
+async function drawCollageLibre(canvas, images, nbRangees, seed, W, H, gap, bgColor) {
+  const ctx = canvas.getContext('2d');
+  // Espace utile = canvas moins les gaps
+  const Wutil = W - gap * 0; // gaps horizontaux gérés dans calculerGrille
+  const Hutil = H - gap * (Math.min(nbRangees, images.length) - 1);
+  canvas.width = W; canvas.height = H;
+  ctx.fillStyle = bgColor || '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  const ratios = images.map(o => o.ratio);
+  const nb = Math.min(nbRangees, images.length);
+  const rangees = repartirEquilibre(ratios, nb, seed);
+  const { hauteurs, largeurs_g } = calculerGrille(rangees, ratios, W, Hutil);
+
+  const doNumL  = typeof getNumbering === 'function' && getNumbering();
+  const numPosL = doNumL ? getNumPos()   : 'br';
+  const numStyL = doNumL ? getNumStyle() : 'white';
+  let yOff = 0, done = 0, total = images.length;
+  for (let ri = 0; ri < rangees.length; ri++) {
+    let xOff = 0;
+    for (let ci = 0; ci < rangees[ri].length; ci++) {
+      const idx = rangees[ri][ci];
+      const wCell = largeurs_g[ri][ci];
+      const hCell = hauteurs[ri];
+      drawCover(ctx, images[idx].img, xOff, yOff, wCell, hCell);
+      if (doNumL) drawNumber(ctx, done + 1, xOff, yOff, wCell, hCell, numPosL, numStyL);
+      xOff += wCell + (ci < rangees[ri].length - 1 ? gap : 0);
+      done++;
+      setProgress(Math.round(done/total*100), `${done}/${total}`);
+      if (done % 5 === 0) await sleep(0);
+    }
+    yOff += hauteurs[ri] + gap;
+  }
+}
+
+async function drawCollageBanniere(canvas, images, cols, W, H, gap, bgColor) {
+  const ctx = canvas.getContext('2d');
+  const rows = Math.ceil(images.length / cols);
+  canvas.width = W; canvas.height = H;
+  ctx.fillStyle = bgColor || '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  // Taille cellule = exactement banner_w × banner_h
+  // Le canvas est déjà calculé pixel-perfect dans getWH()
+  const cw = Math.round((W - gap * (cols - 1)) / cols);
+  const ch = Math.round((H - gap * (rows - 1)) / rows);
+
+  const doNum  = typeof getNumbering === 'function' && getNumbering();
+  const numPos = doNum ? getNumPos()   : 'br';
+  const numSty = doNum ? getNumStyle() : 'white';
+
+  for (let i = 0; i < images.length; i++) {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const x = col * (cw + gap);
+    const y = row * (ch + gap);
+    drawCover(ctx, images[i].img, x, y, cw, ch);
+    if (doNum) drawNumber(ctx, i + 1, x, y, cw, ch, numPos, numSty);
+    setProgress(Math.round((i+1)/images.length*100), `${i+1}/${images.length}`);
+    if (i % 3 === 0) await sleep(0);
+  }
+}
+
+function drawCover(ctx, img, x, y, w, h) {
+  const rSrc = img.naturalWidth / img.naturalHeight;
+  const rDst = w / h;
+  let sw, sh, sx, sy;
+  if (rSrc > rDst) {
+    sh = img.naturalHeight; sw = sh * rDst;
+    sx = (img.naturalWidth - sw) / 2; sy = 0;
+  } else {
+    sw = img.naturalWidth; sh = sw / rDst;
+    sx = 0; sy = (img.naturalHeight - sh) / 2;
+  }
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Génération ─────────────────────────────────────────────────────────────────
+async function genererCollage(isPreview) {
+  if (!loadedImages.length) { toast('⚠️ Charge des visuels d\'abord'); return; }
+
+  const b = getBanner();
+  let {W, H} = getWH();
+
+  // Preview : résolution réduite
+  const scale = isPreview ? 6 : 1;
+  const Wp = Math.max(Math.round(W / scale), 200);
+  const Hp = Math.max(Math.round(H / scale), 150);
+
+  const canvas = document.getElementById('previewCanvas');
+  document.getElementById('btnPreview').disabled = true;
+  document.getElementById('btnExport').disabled = true;
+  setProgress(1, 'Démarrage…');
+
+  if (b) {
+    await drawCollageBanniere(canvas, loadedImages, getCols(), Wp, Hp, isPreview ? Math.round(getGap()/6) : getGap(), getGapColorCurrent());
+  } else {
+    await drawCollageLibre(canvas, loadedImages, getRangees(), getSeed(), Wp, Hp, isPreview ? Math.round(getGapCurrent()/6) : getGapCurrent(), getGapColorCurrent());
+  }
+
+  setProgress(100, 'Terminé');
+  setTimeout(() => setProgress(0, ''), 800);
+
+  document.getElementById('previewWrap').classList.add('visible');
+  document.getElementById('infoBox').innerHTML = `
+    📐 Format : <strong>${formatDim(W, H, getDPI(), getUnite())}</strong> · ${W.toLocaleString()}×${H.toLocaleString()} px · ${getDPI()} DPI<br>
+    🖼 ${loadedImages.length} visuel(s) · ${b ? getCols()+' colonnes' : getRangees()+' rangées · seed '+getSeed()}
+    ${isPreview ? ' <em style="color:#b0aba4">(aperçu 1/'+scale+'ème de la résolution finale)</em>' : ''}
+  `;
+
+  document.getElementById('btnPreview').disabled = false;
+  document.getElementById('btnExport').disabled = false;
+
+  if (!isPreview) {
+    // Téléchargement
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const fname = b
+        ? `planche_${b.label.replace(/\s/g,'_')}_${getCols()}col_${loadedImages.length}imgs.jpg`
+        : `collage_${getRangees()}rangees_seed${getSeed()}.jpg`;
+      a.href = url; a.download = fname; a.click();
+      URL.revokeObjectURL(url);
+      toast('✅ Téléchargement lancé !');
+    }, 'image/jpeg', getQualite());
+  }
+}
+
+function genererPreview() { genererCollage(true); }
+function genererExport()  {
+  // Pour l'export, on redessine en pleine résolution sur un canvas off-screen
+  exportHD();
+}
+
+async function exportHD() {
+  if (!loadedImages.length) return;
+  const b = getBanner();
+  const {W, H} = getWH();
+
+  // Créer un canvas off-screen pour la HD
+  const hdCanvas = document.createElement('canvas');
+  document.getElementById('btnExport').disabled = true;
+  setProgress(1, 'Génération HD…');
+
+  if (b) {
+    await drawCollageBanniere(hdCanvas, loadedImages, getCols(), W, H, getGap(), getGapColorCurrent());
+  } else {
+    await drawCollageLibre(hdCanvas, loadedImages, getRangees(), getSeed(), W, H, getGapCurrent(), getGapColorCurrent());
+  }
+
+  setProgress(100, 'Export…');
+
+  // Vérifier que le canvas est valide avant toBlob
+  if (!hdCanvas.width || !hdCanvas.height) {
+    toast('❌ Erreur : canvas invalide (dimensions nulles)');
+    document.getElementById('btnExport').disabled = false;
+    setProgress(0, '');
+    return;
+  }
+
+  // Mettre à jour le preview avec la HD
+  const prevCanvas = document.getElementById('previewCanvas');
+  prevCanvas.width = hdCanvas.width;
+  prevCanvas.height = hdCanvas.height;
+  prevCanvas.getContext('2d').drawImage(hdCanvas, 0, 0);
+  document.getElementById('previewWrap').classList.add('visible');
+
+  hdCanvas.toBlob(blob => {
+    if (!blob) { toast('❌ Export échoué'); document.getElementById('btnExport').disabled = false; return; }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const fname = b
+      ? `planche_${b.label.replace(/\s/g,'_')}_${getCols()}col_${loadedImages.length}imgs.jpg`
+      : `collage_${getRangees()}rangees_seed${getSeed()}.jpg`;
+    a.href = url; a.download = fname; a.click();
+    URL.revokeObjectURL(url);
+    toast('✅ Collage téléchargé !');
+    setTimeout(() => setProgress(0, ''), 500);
+    document.getElementById('btnExport').disabled = false;
+  }, 'image/jpeg', getQualite());
+}
+
+// ── Détecteur de ratio ──────────────────────────────────────────────────────
+const RATIO_STANDARDS = [
+  {label:'1:1',   val:1/1},
+  {label:'4:3',   val:4/3},
+  {label:'3:2',   val:3/2},
+  {label:'5:4',   val:5/4},
+  {label:'5:3',   val:5/3},
+  {label:'16:9',  val:16/9},
+  {label:'16:10', val:16/10},
+  {label:'2:1',   val:2/1},
+  {label:'21:9',  val:21/9},
+  {label:'3:4',   val:3/4},
+  {label:'2:3',   val:2/3},
+  {label:'4:5',   val:4/5},
+  {label:'9:16',  val:9/16},
+  {label:'10:16', val:10/16},
+  {label:'1:2',   val:1/2},
+];
+
+// Ratio exact par PGCD
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function exactRatio(w, h) {
+  const d = gcd(w, h);
+  return `${w/d}:${h/d}`;
+}
+
+function nearestStdRatio(w, h) {
+  const r = w / h;
+  let best = null, bestDiff = Infinity;
+  for (const s of RATIO_STANDARDS) {
+    const diff = Math.abs(s.val - r) / r;
+    if (diff < bestDiff) { bestDiff = diff; best = s; }
+  }
+  return { label: best.label, diff: (bestDiff * 100).toFixed(1) };
+}
+
+// Correspondance avec les modes de l'app
+const RATIO_KEY_MAP = {
+  '1:1':'ratio_1_1',
+  '5:4':'ratio_5_4', '4:3':'ratio_4_3', '3:2':'ratio_3_2',
+  '5:3':'ratio_5_3', '8:5':'ratio_16_10', '16:9':'ratio_16_9',
+  '2:1':'ratio_2_1', '21:9':'ratio_21_9', '32:9':'ratio_32_9',
+  '4:5':'ratio_4_5', '3:4':'ratio_3_4',   '2:3':'ratio_2_3',
+  '9:16':'ratio_9_16','1:2':'ratio_1_2'
+};
+
+function detectRatio(file) {
+  if (!file) return;
+  const label = document.getElementById('ratioDropLabel');
+  label.style.borderColor = '#c8b89a';
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+  img.onload = () => {
+    const w = img.naturalWidth, h = img.naturalHeight;
+    const exact = exactRatio(w, h);
+    const nearest = nearestStdRatio(w, h);
+    const matchKey = RATIO_KEY_MAP[nearest.label];
+
+    document.getElementById('ratioExact').textContent = `${w}×${h}px (${exact})`;
+    document.getElementById('ratioNearest').textContent = nearest.label;
+
+    // Bouton appliquer si le ratio est dans l'app
+    const applyDiv = document.getElementById('ratioApply');
+    if (matchKey) {
+      applyDiv.innerHTML = `
+        <button onclick="applyRatioMode('${matchKey}')" style="
+          width:100%; background:#c8b89a; color:#1c1c1e; border:none;
+          border-radius:8px; padding:0.5rem; font-family:'Poppins',sans-serif;
+          font-size:0.78rem; font-weight:600; cursor:pointer; margin-top:0.2rem">
+          ↗ Appliquer mode ${nearest.label}
+        </button>`;
+    } else {
+      applyDiv.innerHTML = `<div style="font-size:0.72rem;color:#6e6a64;margin-top:0.3rem">
+        Écart : ${nearest.diff}% — ratio personnalisé</div>`;
+    }
+
+    document.getElementById('ratioResult').style.display = 'block';
+    URL.revokeObjectURL(url);
+    label.style.borderColor = '#444';
+    toast(`📐 Ratio détecté : ${nearest.label} (${nearest.diff}% d'écart)`);
+  };
+  img.src = url;
+  // Reset input pour permettre de re-sélectionner le même fichier
+  document.getElementById('ratioFile').value = '';
+}
+
+function applyRatioMode(key) {
+  const sel = document.getElementById('bannerType');
+  sel.value = key;
+  sel.dispatchEvent(new Event('change'));
+  // Reset le détecteur après application
+  document.getElementById('ratioResult').style.display = 'none';
+  document.getElementById('ratioDropLabel').style.borderColor = '#444';
+  toast('✅ Mode ' + BANNERS[key].label + ' appliqué');
+}
+
+function handleRatioDrop(e) {
+  e.preventDefault();
+  document.getElementById('ratioDropLabel').style.borderColor = '#444';
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) detectRatio(file);
+}
+
+document.getElementById('ratioFile').addEventListener('change', e => {
+  if (e.target.files[0]) detectRatio(e.target.files[0]);
+});
+// Le label est déjà "for" de l'input via onclick — pas de listener click supplémentaire
+
+// ── Numérotation toggle ──────────────────────────────────────────────────────
+document.querySelectorAll('input[name="numU"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('numUopts').style.display =
+      document.getElementById('numUon').checked ? 'block' : 'none';
+  });
+});
+
+function getNumbering()    { return document.getElementById('numUon')?.checked || false; }
+function getNumPos()       { return document.getElementById('numUpos')?.value   || 'br'; }
+function getNumStyle()     { return document.getElementById('numUstyle')?.value || 'white'; }
+function getGapCurrent()   { return parseInt(document.getElementById('gapU')?.value   || 0); }
+function getGapColorCurrent() { return document.getElementById('gapColorU')?.value || '#ffffff'; }
+
+function drawNumber(ctx, num, x, y, w, h, pos, style) {
+  // Taille fixe en px écran indépendante de la résolution du canvas
+  // On cible ~20px de rayon à l'écran → on scale selon le ratio canvas/écran
+  // Mais comme on dessine en résolution native, on fixe une taille absolue raisonnable
+  // La cellule fait w×h px natifs — on veut un cercle discret ~2% du min côté, min 16px, max 24px
+  const r = Math.max(10, Math.min(Math.round(Math.min(w, h) * 0.015), 14));
+  const fontSize = Math.round(r * 1.0);
+  ctx.font = '600 ' + fontSize + 'px Arial, sans-serif';
+  const txt = String(num);
+
+  const margin = Math.round(r * 0.6);
+  let cx, cy;
+  if (pos === 'tl')     { cx = x + margin + r;     cy = y + margin + r; }
+  else if (pos === 'tr'){ cx = x + w - margin - r; cy = y + margin + r; }
+  else if (pos === 'bl'){ cx = x + margin + r;     cy = y + h - margin - r; }
+  else if (pos === 'br'){ cx = x + w - margin - r; cy = y + h - margin - r; }
+  else                  { cx = x + w / 2;          cy = y + h / 2; }
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.18)';
+  ctx.shadowBlur = Math.round(r * 0.3);
+
+  if (style === 'magenta') {
+    // Cercle magenta, chiffre blanc
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#ec008c'; ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffffff';
+  } else if (style === 'outline') {
+    // Cercle transparent, contour magenta, chiffre magenta
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ec008c'; ctx.lineWidth = Math.max(1.5, r * 0.1); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ec008c';
+  } else {
+    // Défaut : cercle blanc, chiffre magenta
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff'; ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ec008c';
+  }
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(txt, cx, cy + Math.round(fontSize * 0.05));
+  ctx.restore();
+}
+
+// Init
+updateKPI();
+document.getElementById('width').addEventListener('input', updateKPI);
+document.getElementById('height').addEventListener('input', updateKPI);
+document.getElementById('dpi').addEventListener('change', updateKPI);
+document.getElementById('rangees').addEventListener('input', updateStats);
+document.getElementById('cols').addEventListener('input', () => {
+  updateStats();
+  if (getBanner()) updateBannerCanvas();
+});
+document.getElementById('gapU').addEventListener('input', () => {
+  if (getBanner()) updateBannerCanvas();
+});
+</script>
+</body>
+</html>
