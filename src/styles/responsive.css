@@ -1,0 +1,23 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media(max-width:1024px){
+  .app-shell{flex-direction:column;max-width:720px;padding:.75rem .75rem 1.5rem}
+  .panel-left{
+    width:100%;min-width:0;height:auto;position:relative;
+    display:grid;grid-template-columns:1fr 1fr;gap:.5rem;
+    overflow:visible;padding-right:0;
+  }
+  .panel-right{height:auto;overflow:visible;padding-right:0}
+  .card{padding:.7rem .75rem}
+}
+@media(max-width:640px){
+  .topbar-nav{display:none}
+  .app-shell{padding:.5rem .5rem 1.5rem}
+  .panel-left{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .btn-row{grid-template-columns:1fr}
+  .field-row{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:1fr}
+  .canvas-wrap{max-height:350px}
+}

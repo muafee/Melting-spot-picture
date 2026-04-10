@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node _check.js)",
+      "Bash(mkdir -p src/config src/utils src/modules/bd src/events src/styles public/img)",
+      "Bash(cp img/logo_mdz.png public/img/)",
+      "Bash(node _extract.js)",
+      "Bash(sed -n '1093,1921p' index_backup.html)",
+      "Read(//tmp/**)",
+      "Bash(npm install:*)",
+      "Bash(pkill -f \"vite\")",
+      "mcp__Claude_Preview__preview_start",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__evaluate_script",
+      "Bash(wc -l index.html src/app.js src/main.js src/styles/*.css)",
+      "Bash(node -c src/app.js)"
+    ]
+  }
+}

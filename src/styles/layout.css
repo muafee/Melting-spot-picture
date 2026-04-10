@@ -1,0 +1,62 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOPBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+.topbar{
+  background:var(--navy);height:var(--topbar-h);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 1.25rem;position:sticky;top:0;z-index:100;
+  box-shadow:0 1px 0 rgba(255,255,255,.03);flex-shrink:0;
+  border-bottom:1px solid var(--border);
+}
+.topbar-left{display:flex;align-items:center;gap:1rem}
+.topbar-logo img{height:36px;display:block;border-radius:4px}
+.topbar-sep{width:1px;height:24px;background:var(--border)}
+.topbar-title{font-size:.88rem;font-weight:700;color:var(--text);letter-spacing:.02em}
+.topbar-title .accent{color:var(--accent)}
+.topbar-badge{
+  font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--accent);color:var(--navy);padding:2px 7px;border-radius:4px;
+  margin-left:.4rem;vertical-align:middle;
+}
+.topbar-nav{display:flex;align-items:center;gap:.25rem}
+.topbar-link{
+  display:flex;align-items:center;gap:.3rem;
+  padding:.35rem .7rem;border-radius:8px;
+  font-size:.68rem;font-weight:500;color:var(--text-muted);
+  text-decoration:none;transition:all var(--tr);
+  border:1px solid transparent;
+}
+.topbar-link:hover{color:var(--text);background:rgba(255,255,255,.04);border-color:var(--border)}
+.topbar-link .ico{font-size:.8rem}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   APP LAYOUT — Centered container with two independent panels
+   ═══════════════════════════════════════════════════════════════════════════ */
+.app-shell{
+  flex:1;display:flex;justify-content:center;
+  padding:.75rem .75rem 1.5rem;gap:.75rem;
+  max-width:1800px;margin:0 auto;width:100%;
+  min-height:0;
+}
+
+/* ── LEFT PANEL ─────────────────────────────────────────────────────────── */
+.panel-left{
+  width:var(--panel-left);min-width:var(--panel-left);
+  height:calc(100vh - var(--topbar-h) - 1.5rem);
+  position:sticky;top:calc(var(--topbar-h) + .75rem);
+  overflow-y:auto;overflow-x:hidden;
+  display:flex;flex-direction:column;gap:.5rem;
+  scrollbar-width:thin;scrollbar-color:rgba(196,154,108,.15) transparent;
+  padding-right:4px;
+}
+
+/* ── CENTER PANEL (canvas/preview) ──────────────────────────────────────── */
+.panel-right{
+  flex:1;min-width:0;
+  height:calc(100vh - var(--topbar-h) - 1.5rem);
+  overflow-y:auto;overflow-x:hidden;
+  display:flex;flex-direction:column;gap:0;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.06) transparent;
+  padding-right:4px;
+  position:sticky;top:calc(var(--topbar-h) + .75rem);
+}

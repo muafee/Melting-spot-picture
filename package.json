@@ -1,0 +1,14 @@
+{
+  "name": "collage-studio",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Collage Studio Pro — Collage & BD/Manga editor",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.0"
+  }
+}

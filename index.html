@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collage Studio Pro — MDZ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:ital,wght@0,400;0,700;1,400&family=Anton&display=swap" rel="stylesheet">
+<script type="module" src="/src/main.js"></script>
+</head>
+<body>
+
+<!-- ════════════════ TOPBAR ════════════════ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="#" class="topbar-logo"><img src="/img/logo_mdz.png" alt="MDZ Studio"></a>
+    <div class="topbar-sep"></div>
+    <div class="topbar-title">Collage <span class="accent">Studio</span> <span class="topbar-badge">PRO</span></div>
+  </div>
+  <nav class="topbar-nav">
+    
+    
+  </nav>
+</header>
+
+<!-- ════════════════ APP SHELL ════════════════ -->
+<div class="app-shell">
+
+<!-- ────────────── LEFT PANEL ────────────── -->
+<aside class="panel-left">
+
+  <!-- Mode -->
+  <div class="card" id="cardMode">
+    <div class="card-header" onclick="toggleCard('cardMode')">
+      <h3><span class="card-ico">&#x2699;</span> Mode
+        <span class="card-help" onclick="event.stopPropagation()">?<span class="card-help-tip">Choisissez le type de collage : <b>Collage libre</b> adapte les tailles en fonction des ratios de vos images. Les <b>modes banniere/ratio</b> utilisent des dimensions fixes predefinies (reseaux sociaux, impression, etc.).</span></span>
+      </h3>
+      <span class="card-toggle">&#x25BC;</span>
+    </div>
+    <div class="card-body">
+      <select id="bannerType">
+        <option value="">Collage libre (ratios mixtes)</option>
+        <optgroup label="Carre">
+          <option value="ratio_1_1">Carre 1:1</option>
+        </optgroup>
+        <optgroup label="Paysage">
+          <option value="ratio_5_4">5:4</option>
+          <option value="ratio_4_3">4:3</option>
+          <option value="ratio_3_2">3:2</option>
+          <option value="ratio_5_3">5:3</option>
+          <option value="ratio_16_10">16:10</option>
+          <option value="ratio_16_9">16:9</option>
+          <option value="ratio_2_1">2:1</option>
+          <option value="ratio_21_9">Ultrawide 21:9</option>
+          <option value="ratio_32_9">Ultrawide 32:9</option>
+        </optgroup>
+        <optgroup label="Portrait">
+          <option value="ratio_4_5">4:5</option>
+          <option value="ratio_3_4">3:4</option>
+          <option value="ratio_2_3">2:3</option>
+          <option value="ratio_9_16">9:16</option>
+          <option value="ratio_1_2">1:2</option>
+        </optgroup>
+        <optgroup label="Planche BD / Manga">
+          <option value="bd_a4_portrait">Planche A4 Portrait</option>
+          <option value="bd_a4_paysage">Planche A4 Paysage</option>
+          <option value="bd_a3_portrait">Planche A3 Portrait</option>
+          <option value="bd_us_portrait">Format US Comics</option>
+          <option value="manga_tankobon">Manga Tankobon (B6)</option>
+        </optgroup>
+      </select>
+      <div id="bannerTags" style="margin-top:.4rem"></div>
+    </div>
+  </div>
+
+  <!-- BD / Manga Panel (hidden by default) -->
+  <div class="card hidden" id="cardBD">
+    <div class="card-header" onclick="toggleCard('cardBD')">
+      <h3><span class="card-ico">&#x1F4D6;</span> Planche BD
+        <span class="card-help" onclick="event.stopPropagation()">?<span class="card-help-tip">Editeur de planche BD/Manga. Ajoutez des <b>cases</b>, assignez-leur des images, ajoutez des <b>bulles de dialogue</b>. Deplacez et redimensionnez les cases directement sur le canvas.</span></span>
+      </h3>
+      <span class="card-toggle">&#x25BC;</span>
+    </div>
+    <div class="card-body">
+      <!-- Sub A: Format & Fond -->
+      <span class="field-label">Couleur de fond</span>
+      <div class="swatch-row" id="bdSwatchRow">
+        <div class="swatch active" data-color="#ffffff" style="background:#ffffff" onclick="pickSwatch(this)"></div>
+        <div class="swatch" data-color="#1c1c1e" style="background:#1c1c1e" onclick="pickSwatch(this)"></div>
+        <div class="swatch" data-color="#f5e6c8" style="background:#f5e6c8" onclick="pickSwatch(this)" title="Sepia"></div>
+        <div class="swatch" data-color="#e8e8e8" style="background:#e8e8e8" onclick="pickSwatch(this)" title="Gris BD"></div>
+        <div class="swatch swatch-custom" data-color="#ff6600" style="background:#ff6600" title="Couleur libre">
+          <input type="color" value="#ff6600" oninput="pickCustomColor(this)">
+        </div>
+      </div>
+      <span class="field-label" style="margin-top:.4rem">Gouttieres (px)</span>
+      <div style="display:flex;gap:.4rem;align-items:center;font-size:.6rem">
+        <label style="display:flex;align-items:center;gap:.2rem;flex:1" title="Espacement vertical entre colonnes (plus fin)">
+          V <input type="number" id="bdGutterV" min="0" max="40" value="20" style="width:3rem;text-align:center">
+        </label>
+        <label style="display:flex;align-items:center;gap:.2rem;flex:1" title="Espacement horizontal entre rangees (plus large)">
+          H <input type="number" id="bdGutterH" min="0" max="60" value="60" style="width:3rem;text-align:center">
+        </label>
+      </div>
+      <span class="field-label" style="margin-top:.4rem">Marges du document (%)</span>
+      <div class="slider-row">
+        <input type="range" id="bdMargin" min="0" max="10" step="0.5" value="4">
+        <span class="slider-val" id="bdMarginVal">4%</span>
+      </div>
+      <span class="field-label" style="margin-top:.4rem">Bordure globale</span>
+      <div class="option-inline-row">
+        <select id="bdBorderStyle" style="flex:1">
+          <option value="thick">Noir epais (4px)</option>
+          <option value="thin">Noir fin (2px)</option>
+          <option value="white">Blanc (3px)</option>
+          <option value="custom">Couleur custom</option>
+        </select>
+        <div class="color-mini-wrap" title="Couleur bordure custom">
+          <input type="color" id="bdBorderCustomColor" value="#000000">
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem;padding:.45rem .55rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:8px">
+        <div>
+          <div style="font-size:.68rem;font-weight:700;color:var(--text)">&#x1F4D6; Double page</div>
+          <div style="font-size:.55rem;color:var(--text-muted);margin-top:.05rem">Spread — deux pages côte à côte</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:.35rem;cursor:pointer">
+          <input type="checkbox" id="bdSpreadToggle" onchange="bd_toggleSpread()">
+          <span style="font-size:.65rem;font-weight:600;color:var(--text-mid)" id="bdSpreadLabel">OFF</span>
+        </label>
+      </div>
+      <!-- Indicateur format spread (visible seulement quand spread actif) -->
+      <div class="hidden" id="bdSpreadInfo" style="margin-top:.3rem;font-size:.58rem;color:var(--magenta);font-weight:600;text-align:center;padding:.2rem;background:var(--magenta-dim);border-radius:6px"></div>
+
+      <!-- Numérotation de pages -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem;padding:.45rem .55rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:8px">
+        <div>
+          <div style="font-size:.68rem;font-weight:700;color:var(--text)">&#x0023; Numérotation</div>
+          <div style="font-size:.55rem;color:var(--text-muted);margin-top:.05rem">Numéros de page sur la planche</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:.35rem;cursor:pointer">
+          <input type="checkbox" id="bdPageNumToggle" onchange="bd_updatePageNum()">
+          <span style="font-size:.65rem;font-weight:600;color:var(--text-mid)" id="bdPageNumLabel">OFF</span>
+        </label>
+      </div>
+      <div id="bdPageNumOptions" style="margin-top:.3rem;padding:.4rem .5rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:8px;display:none;flex-direction:column;gap:.35rem">
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <span class="field-label" style="margin:0;flex-shrink:0;width:55px">Position</span>
+          <select id="bdPageNumPos" onchange="bd_updatePageNum()" style="flex:1;font-size:.65rem">
+            <option value="bottom-center">Bas centre</option>
+            <option value="bottom-outside">Bas extérieur (BD)</option>
+            <option value="bottom-inside">Bas intérieur</option>
+            <option value="top-center">Haut centre</option>
+            <option value="top-outside">Haut extérieur</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <span class="field-label" style="margin:0;flex-shrink:0;width:55px">Début</span>
+          <input type="number" id="bdPageNumStart" value="1" min="0" max="999" style="width:3.5rem;font-size:.65rem" onchange="bd_updatePageNum()">
+          <span class="field-label" style="margin:0;flex-shrink:0;width:40px">Taille</span>
+          <input type="number" id="bdPageNumSize" value="14" min="6" max="48" style="width:3rem;font-size:.65rem" onchange="bd_updatePageNum()">
+        </div>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <span class="field-label" style="margin:0;flex-shrink:0;width:55px">Couleur</span>
+          <input type="color" id="bdPageNumColor" value="#333333" onchange="bd_updatePageNum()" style="width:2rem;height:1.3rem;border:none;cursor:pointer">
+          <span class="field-label" style="margin:0;flex-shrink:0;width:55px">Police</span>
+          <select id="bdPageNumFont" onchange="bd_updatePageNum()" style="flex:1;font-size:.65rem">
+            <option value="Inter">Inter</option>
+            <option value="Georgia">Georgia (serif)</option>
+            <option value="Courier New">Courier (mono)</option>
+            <option value="Arial">Arial</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <span class="field-label" style="margin:0;flex-shrink:0;width:55px">Format</span>
+          <select id="bdPageNumFormat" onchange="bd_updatePageNum()" style="flex:1;font-size:.65rem">
+            <option value="number">1, 2, 3...</option>
+            <option value="dash">— 1 —</option>
+            <option value="bracket">[1]</option>
+            <option value="page">Page 1</option>
+            <option value="roman">I, II, III...</option>
+          </select>
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:.6rem 0">
+
+      <!-- Sub B: Cases -->
+      <span class="field-label">Cases</span>
+      <div class="bd-cell-list" id="bdCellList">
+        <div style="font-size:.6rem;color:var(--text-muted);padding:.3rem;text-align:center">Aucune case — utilisez un template ou ajoutez manuellement</div>
+      </div>
+      <div style="display:flex;gap:.3rem;margin-top:.4rem">
+        <button class="btn-outline" style="flex:1;font-size:.6rem;padding:.3rem .5rem" onclick="bd_addCell()">+ Ajouter</button>
+        <button class="btn-outline" id="bdTemplateBtn" style="flex:1;font-size:.6rem;padding:.3rem .5rem" onclick="bd_openTemplateModal()">&#x1F4CB; Templates</button>
+        <button class="btn-outline" id="bdEqualizeBtn" style="flex:1;font-size:.6rem;padding:.3rem .5rem" title="Egaliser toutes les cases" onclick="bd_autoSnapGutters()">&#x1F9F2; Egal.</button>
+        <button class="btn-outline" style="font-size:.6rem;padding:.3rem .35rem" title="Egaliser selection horizontalement (Shift+Clic pour selectionner)" onclick="bd_equalizeSelected('h')">&#x2194;</button>
+        <button class="btn-outline" style="font-size:.6rem;padding:.3rem .35rem" title="Egaliser selection verticalement (Shift+Clic pour selectionner)" onclick="bd_equalizeSelected('v')">&#x2195;</button>
+        <button class="btn-outline" id="bdUndoBtn" style="font-size:.7rem;padding:.3rem .35rem;line-height:1" title="Annuler (Ctrl+Z)" onclick="bd_undo()" disabled>&#x21A9;</button>
+        <button class="btn-outline" id="bdRedoBtn" style="font-size:.7rem;padding:.3rem .35rem;line-height:1" title="Retablir (Ctrl+Y)" onclick="bd_redo()" disabled>&#x21AA;</button>
+      </div>
+
+      <!-- Selected cell properties -->
+      <div class="bd-props hidden" id="bdCellProps">
+        <span class="field-label">Case selectionnee</span>
+        <div class="field-row">
+          <div><span class="field-label">X (%)</span><input type="number" id="bdCellX" min="0" max="100" step="0.5" style="width:100%"></div>
+          <div><span class="field-label">Y (%)</span><input type="number" id="bdCellY" min="0" max="100" step="0.5" style="width:100%"></div>
+        </div>
+        <div class="field-row">
+          <div><span class="field-label">Largeur (%)</span><input type="number" id="bdCellW" min="2" max="100" step="0.5" style="width:100%"></div>
+          <div><span class="field-label">Hauteur (%)</span><input type="number" id="bdCellH" min="2" max="100" step="0.5" style="width:100%"></div>
+        </div>
+        <span class="field-label">Bordure case</span>
+        <div class="option-inline-row">
+          <div class="slider-row" style="flex:1">
+            <input type="range" id="bdCellBorder" min="0" max="20" value="4">
+            <span class="slider-val" id="bdCellBorderVal">4</span>
+          </div>
+          <div class="color-mini-wrap"><input type="color" id="bdCellBorderColor" value="#000000"></div>
+        </div>
+        <span class="field-label">Arrondi</span>
+        <div class="slider-row">
+          <input type="range" id="bdCellRadius" min="0" max="40" value="0">
+          <span class="slider-val" id="bdCellRadiusVal">0</span>
+        </div>
+        <span class="field-label">Rotation</span>
+        <div class="slider-row">
+          <input type="range" id="bdCellRotation" min="-180" max="180" value="0" step="1">
+          <span class="slider-val" id="bdCellRotationVal">0&deg;</span>
+          <button class="btn-outline" style="font-size:.5rem;padding:.1rem .3rem;margin-left:.2rem" onclick="$('bdCellRotation').value=0;$('bdCellRotation').dispatchEvent(new Event('input'))">0</button>
+        </div>
+        <span class="field-label">Transformation libre <span id="bdCornerStatus" style="font-size:.5rem;font-weight:400;margin-left:.3rem;color:var(--text-muted)">Rectangle</span></span>
+        <div style="font-size:.5rem;color:var(--text-muted);margin-bottom:.3rem">Ctrl+Glisser un coin = déformer librement &bull; Shift = 1 axe</div>
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr auto 1fr 1fr;gap:.15rem .2rem;margin-bottom:.3rem;font-size:.5rem;align-items:center">
+          <span style="color:var(--text-muted)">↖</span>
+          <input type="number" id="bdCellCornerTL" value="0" step="0.5" title="X offset ↖" style="width:100%;font-size:.55rem;padding:.1rem .2rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:3px;color:var(--text)">
+          <input type="number" id="bdCellCornerTLY" value="0" step="0.5" title="Y offset ↖" style="width:100%;font-size:.55rem;padding:.1rem .2rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:3px;color:var(--accent)">
+          <span style="color:var(--text-muted)">↗</span>
+          <input type="number" id="bdCellCornerTR" value="0" step="0.5" title="X offset ↗" style="width:100%;font-size:.55rem;padding:.1rem .2rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:3px;color:var(--text)">
+          <input type="number" id="bdCellCornerTRY" value="0" step="0.5" title="Y offset ↗" style="width:100%;font-size:.55rem;padding:.1rem .2rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:3px;color:var(--accent)">
+          <span style="color:var(--text-muted)">↙</span>
+          <input type="number" id="bdCellCornerBL" value="0" step="0.5" title="X offset ↙" style="width:100%;font-size:.55rem;padding:.1rem .2rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:3px;color:var(--text)">
+          <input type="number" id="bdCellCornerBLY" value="0" step="0.5" title="Y offset ↙" style="width:100%;font-size:.55rem;padding:.1rem .2rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:3px;color:var(--accent)">
+          <span style="color:var(--text-muted)">↘</span>
+          <input type="number" id="bdCellCornerBR" value="0" step="0.5" title="X offset ↘" style="width:100%;font-size:.55rem;padding:.1rem .2rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:3px;color:var(--text)">
+          <input type="number" id="bdCellCornerBRY" value="0" step="0.5" title="Y offset ↘" style="width:100%;font-size:.55rem;padding:.1rem .2rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:3px;color:var(--accent)">
+        </div>
+        <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+          <button class="btn-outline" style="font-size:.55rem;padding:.15rem .4rem;flex:1" onclick="bd_resetCorners()">&#x25A1; Droit</button>
+          <select id="bdTriangleDir" style="font-size:.55rem;padding:.1rem .2rem;background:var(--surface-alt);border:1px solid var(--border);border-radius:3px;color:var(--text);flex:1;min-width:0">
+            <option value="up">&#x25B2; Haut</option>
+            <option value="down">&#x25BC; Bas</option>
+            <option value="left">&#x25C0; Gauche</option>
+            <option value="right">&#x25B6; Droite</option>
+            <option value="tl">&#x25E3; Coin HG</option>
+            <option value="tr">&#x25E2; Coin HD</option>
+            <option value="bl">&#x25E4; Coin BG</option>
+            <option value="br">&#x25E5; Coin BD</option>
+          </select>
+          <button class="btn-outline" style="font-size:.55rem;padding:.15rem .4rem;flex:1" onclick="bd_makeTriangle($('bdTriangleDir').value)">&#x25B3; Triangle</button>
+        </div>
+        <div class="pill-group" style="margin:.3rem 0">
+          <label class="pill" title="Permet a cette case de depasser les marges exterieures (fond perdu manga)"><input type="checkbox" id="bdCellBleed"> Fond perdu</label>
+        </div>
+        <span class="field-label">Image</span>
+        <div style="display:flex;align-items:center;gap:.3rem">
+          <span id="bdCellImgInfo" style="font-size:.6rem;color:var(--text-muted)">Aucune</span>
+          <button class="btn-outline" style="font-size:.55rem;padding:.15rem .4rem" onclick="bd_editCellCrop()">&#x270F; Editer</button>
+          <button class="btn-outline" style="font-size:.55rem;padding:.15rem .4rem" onclick="bd_removeImage()">Retirer</button>
+        </div>
+        <div style="margin-top:.3rem">
+          <button class="btn-outline" style="font-size:.55rem;padding:.2rem .5rem;width:100%" onclick="if(_bdSelection.type==='cell')bd_duplicateCell(_bdSelection.id)">&#x1F4CB; Dupliquer cette case</button>
+        </div>
+        <span class="field-label" style="margin-top:.4rem">Filtres (cette case)</span>
+        <div class="pill-group" style="margin-bottom:.2rem">
+          <label class="pill"><input type="checkbox" id="bdCellManga"> Manga N&amp;B</label>
+        </div>
+        <div class="field-row" style="gap:.4rem">
+          <div style="flex:1"><span class="field-label">Luminosite</span>
+            <div class="slider-row"><input type="range" id="bdCellBrightness" min="50" max="150" value="100"><span class="slider-val" id="bdCellBrightnessVal">100%</span></div>
+          </div>
+          <div style="flex:1"><span class="field-label">Contraste</span>
+            <div class="slider-row"><input type="range" id="bdCellContrast" min="50" max="150" value="100"><span class="slider-val" id="bdCellContrastVal">100%</span></div>
+          </div>
+        </div>
+        <button class="btn-outline" style="font-size:.55rem;padding:.15rem .4rem;margin-top:.2rem" onclick="bd_resetCellFilters()">Reinitialiser (global)</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:.6rem 0">
+
+      <!-- Sub C: Bulles -->
+      <span class="field-label">Bulles de dialogue</span>
+      <div class="bd-bubble-list" id="bdBubbleList">
+        <div style="font-size:.6rem;color:var(--text-muted);padding:.3rem;text-align:center">Aucune bulle</div>
+      </div>
+      <div style="margin-top:.4rem">
+        <button class="btn-outline" style="font-size:.6rem;padding:.3rem .5rem;width:100%" onclick="bd_addBubble()">+ Ajouter une bulle</button>
+      </div>
+
+      <!-- Selected bubble properties -->
+      <div class="bd-props hidden" id="bdBubbleProps">
+        <span class="field-label">Type</span>
+        <div class="pill-group" id="bdBubbleTypeGroup">
+          <label class="pill"><input type="radio" name="bdBubbleType" value="speech" checked> Parole</label>
+          <label class="pill"><input type="radio" name="bdBubbleType" value="thought"> Pensee</label>
+          <label class="pill"><input type="radio" name="bdBubbleType" value="shout"> Cri</label>
+          <label class="pill"><input type="radio" name="bdBubbleType" value="caption"> Legende</label>
+        </div>
+        <span class="field-label">Texte</span>
+        <textarea id="bdBubbleText" rows="3" style="width:100%;resize:vertical;max-height:100px;font-size:.7rem;border:1px solid var(--border);border-radius:6px;padding:.3rem .4rem;font-family:inherit" placeholder="Texte de la bulle... (Entree = saut de ligne)"></textarea>
+        <span class="field-label">Alignement</span>
+        <div class="pill-group">
+          <label class="pill"><input type="radio" name="bdBubbleAlign" value="left"> Gauche</label>
+          <label class="pill"><input type="radio" name="bdBubbleAlign" value="center" checked> Centre</label>
+          <label class="pill"><input type="radio" name="bdBubbleAlign" value="right"> Droite</label>
+        </div>
+        <div class="field-row">
+          <div><span class="field-label">Police</span>
+            <select id="bdBubbleFont" style="width:100%">
+              <option value="Comic Neue">Comic Neue</option>
+              <option value="Bangers">Bangers (Comics)</option>
+              <option value="Anton">Anton (Impact)</option>
+              <option value="Impact">Impact</option>
+              <option value="Arial">Arial</option>
+            </select>
+          </div>
+          <div><span class="field-label">Taille</span>
+            <input type="number" id="bdBubbleFontSize" value="32" min="8" max="120" style="width:100%">
+          </div>
+        </div>
+        <div class="field-row">
+          <div><span class="field-label">Couleur texte</span><input type="color" id="bdBubbleFontColor" value="#000000"></div>
+          <div><span class="field-label">Fond bulle</span><input type="color" id="bdBubbleBgColor" value="#ffffff"></div>
+        </div>
+        <div class="pill-group" style="margin-top:.3rem">
+          <label class="pill"><input type="checkbox" id="bdBubbleFlip"> &#x21C4; Retourner (miroir)</label>
+        </div>
+        <span class="field-label">Rotation</span>
+        <div class="slider-row">
+          <input type="range" id="bdBubbleRotation" min="-180" max="180" value="0" step="1">
+          <span class="slider-val" id="bdBubbleRotationVal">0&deg;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BD Appearance (hidden by default) -->
+  <div class="card hidden" id="cardBDAppearance">
+    <div class="card-header" onclick="toggleCard('cardBDAppearance')">
+      <h3><span class="card-ico">&#x1F3A8;</span> Apparence BD
+        <span class="card-help" onclick="event.stopPropagation()">?<span class="card-help-tip">Appliquez des effets visuels globaux sur les images des cases. Le <b>filtre manga</b> convertit automatiquement en noir et blanc avec contraste renforce.</span></span>
+      </h3>
+      <span class="card-toggle">&#x25BC;</span>
+    </div>
+    <div class="card-body">
+      <div class="pill-group" style="margin-bottom:.4rem">
+        <label class="pill"><input type="checkbox" id="bdMangaFilter"> Filtre Manga N&amp;B</label>
+      </div>
+      <span class="field-label">Luminosite</span>
+      <div class="slider-row"><input type="range" id="bdBrightness" min="50" max="150" value="100"><span class="slider-val" id="bdBrightnessVal">100%</span></div>
+      <span class="field-label" style="margin-top:.3rem">Contraste</span>
+      <div class="slider-row"><input type="range" id="bdContrast" min="50" max="150" value="100"><span class="slider-val" id="bdContrastVal">100%</span></div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:.5rem 0">
+      <span class="field-label">Bordure toutes les cases</span>
+      <div class="option-inline-row">
+        <div class="slider-row" style="flex:1">
+          <input type="range" id="bdGlobalBorder" min="0" max="20" value="4">
+          <span class="slider-val" id="bdGlobalBorderVal">4</span>
+        </div>
+        <div class="color-mini-wrap"><input type="color" id="bdGlobalBorderColor" value="#000000"></div>
+      </div>
+      <span class="field-label" style="margin-top:.3rem">Arrondi toutes les cases</span>
+      <div class="slider-row">
+        <input type="range" id="bdGlobalRadius" min="0" max="40" value="0">
+        <span class="slider-val" id="bdGlobalRadiusVal">0</span>
+      </div>
+      <button class="btn-outline" style="font-size:.55rem;padding:.2rem .5rem;margin-top:.3rem;width:100%" onclick="bd_applyGlobalBorderRadius()">&#x1F504; Appliquer a toutes les cases</button>
+    </div>
+  </div>
+
+  <!-- Dimensions -->
+  <div class="card" id="cardDim">
+    <div class="card-header" onclick="toggleCard('cardDim')">
+      <h3><span class="card-ico">&#x1F4D0;</span> Dimensions
+        <span class="card-disabled-badge">Auto</span>
+        <span class="card-help" onclick="event.stopPropagation()">?<span class="card-help-tip">Definissez la taille de votre collage : largeur, hauteur, unite (px, cm, mm, in) et resolution DPI. <b>Disponible uniquement en mode Collage libre</b> — les autres modes utilisent des dimensions calculees automatiquement.</span></span>
+      </h3>
+      <span class="card-toggle">&#x25BC;</span>
+    </div>
+    <div class="card-body">
+      <div class="field-row" style="margin-bottom:.4rem">
+        <div>
+          <span class="field-label">Unite</span>
+          <select id="unite" onchange="onUniteChange()">
+            <option value="px">Pixels (px)</option>
+            <option value="cm" selected>Centimetres</option>
+            <option value="mm">Millimetres</option>
+            <option value="in">Pouces (in)</option>
+          </select>
+        </div>
+        <div>
+          <span class="field-label">Resolution</span>
+          <select id="dpi" onchange="onDpiChange()">
+            <option value="72">72 DPI — Web</option>
+            <option value="96">96 DPI — Ecran</option>
+            <option value="150" selected>150 DPI — Presen.</option>
+            <option value="300">300 DPI — Print</option>
+            <option value="600">600 DPI — HD Print</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row" style="margin-bottom:.35rem">
+        <div>
+          <span class="field-label">Largeur</span>
+          <input type="number" id="width" value="60" step="0.1" min="0.1">
+        </div>
+        <div>
+          <span class="field-label">Hauteur</span>
+          <input type="number" id="height" value="80" step="0.1" min="0.1">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.3rem;margin-bottom:.4rem">
+        <label style="font-size:.62rem;font-weight:600;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;gap:.25rem">
+          <input type="checkbox" id="lockRatio"> Verrouiller ratio
+        </label>
+      </div>
+      <span class="field-label">Presets</span>
+      <div class="presets-accordion" id="presetsGrid"></div>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="card" id="cardGrid">
+    <div class="card-header" onclick="toggleCard('cardGrid')">
+      <h3><span class="card-ico">&#x2637;</span> Grille
+        <span class="card-help" onclick="event.stopPropagation()">?<span class="card-help-tip">Controlez la disposition : <b>Rangees</b> (mode libre) ou <b>Colonnes</b> (mode banniere). La <b>Variante (seed)</b> change l'arrangement aleatoire des images dans la grille.</span></span>
+      </h3>
+      <span class="card-toggle">&#x25BC;</span>
+    </div>
+    <div class="card-body">
+      <div id="sectionLibre">
+        <span class="field-label">Rangees</span>
+        <div class="slider-row">
+          <input type="range" id="rangees" min="1" max="30" value="5">
+          <span class="slider-val" id="rangeesVal">5</span>
+        </div>
+      </div>
+      <div id="sectionBanner" class="hidden">
+        <span class="field-label">Colonnes</span>
+        <div class="slider-row">
+          <input type="range" id="cols" min="1" max="8" value="2">
+          <span class="slider-val" id="colsVal">2</span>
+        </div>
+      </div>
+      <div id="sectionSeed" style="margin-top:.5rem">
+        <span class="field-label">Variante (seed)</span>
+        <div class="slider-row">
+          <input type="range" id="seed" min="0" max="99" value="42">
+          <span class="slider-val" id="seedVal">42</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appearance -->
+  <div class="card" id="cardAppearance">
+    <div class="card-header" onclick="toggleCard('cardAppearance')">
+      <h3><span class="card-ico">&#x1F3A8;</span> Apparence
+        <span class="card-help" onclick="event.stopPropagation()">?<span class="card-help-tip">Personnalisez le rendu visuel : <b>espacement</b> entre images, <b>couleur de fond</b>, <b>arrondi</b> des coins, <b>contour</b> et <b>ombre</b> sur chaque image. Choisissez aussi le mode de remplissage (cover/contain).</span></span>
+      </h3>
+      <span class="card-toggle">&#x25BC;</span>
+    </div>
+    <div class="card-body">
+      <span class="field-label">Espacement (px)</span>
+      <div class="slider-row">
+        <input type="range" id="gap" min="0" max="50" value="0">
+        <span class="slider-val" id="gapVal">0</span>
+      </div>
+      <span class="field-label" style="margin-top:.5rem">Couleur de fond</span>
+      <div class="swatch-row" id="swatchRow">
+        <div class="swatch active" data-color="#ffffff" style="background:#ffffff" onclick="pickSwatch(this)"></div>
+        <div class="swatch" data-color="#f4f3f8" style="background:#f4f3f8" onclick="pickSwatch(this)"></div>
+        <div class="swatch" data-color="#e0e0e0" style="background:#e0e0e0" onclick="pickSwatch(this)"></div>
+        <div class="swatch" data-color="#1c1c1e" style="background:#1c1c1e" onclick="pickSwatch(this)"></div>
+        <div class="swatch" data-color="#ec008c" style="background:#ec008c" onclick="pickSwatch(this)"></div>
+        <div class="swatch" data-color="#1e1b3a" style="background:#1e1b3a" onclick="pickSwatch(this)"></div>
+        <div class="swatch swatch-custom" data-color="#ff6600" style="background:#ff6600" title="Couleur libre">
+          <input type="color" value="#ff6600" oninput="pickCustomColor(this)">
+        </div>
+      </div>
+      <span class="field-label" style="margin-top:.5rem">Arrondi images (px)</span>
+      <div class="slider-row">
+        <input type="range" id="borderRadius" min="0" max="30" value="0">
+        <span class="slider-val" id="borderRadiusVal">0</span>
+      </div>
+      <span class="field-label" style="margin-top:.5rem">Contour images</span>
+      <div class="option-inline-row">
+        <div class="slider-row" style="flex:1">
+          <input type="range" id="imgBorder" min="0" max="20" value="0">
+          <span class="slider-val" id="imgBorderVal">0</span>
+        </div>
+        <div class="color-mini-wrap" title="Couleur du contour">
+          <input type="color" id="imgBorderColor" value="#1e1b3a">
+          <span class="color-mini-label">Couleur</span>
+        </div>
+      </div>
+
+      <span class="field-label" style="margin-top:.5rem">Ombre images</span>
+      <div class="option-inline-row">
+        <div class="slider-row" style="flex:1">
+          <input type="range" id="imgShadow" min="0" max="30" value="0">
+          <span class="slider-val" id="imgShadowVal">0</span>
+        </div>
+        <div class="color-mini-wrap" title="Couleur de l'ombre">
+          <input type="color" id="imgShadowColor" value="#000000">
+          <span class="color-mini-label">Couleur</span>
+        </div>
+      </div>
+
+      <span class="field-label" style="margin-top:.5rem">Ajustement image</span>
+      <div class="pill-group">
+        <label class="pill"><input type="radio" name="fitMode" value="cover" checked> Remplir (cover)</label>
+        <label class="pill"><input type="radio" name="fitMode" value="contain"> Contenir</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Numbering -->
+  <div class="card" id="cardNum">
+    <div class="card-header" onclick="toggleCard('cardNum')">
+      <h3><span class="card-ico">&#x0023;</span> Numerotation
+        <span class="card-help" onclick="event.stopPropagation()">?<span class="card-help-tip">Ajoutez un <b>numero</b> sur chaque image du collage. Utile pour referencer les visuels dans une presentation. Choisissez la position, le style et le numero de depart.</span></span>
+      </h3>
+      <span class="card-toggle">&#x25BC;</span>
+    </div>
+    <div class="card-body">
+      <div class="pill-group" style="margin-bottom:.4rem">
+        <label class="pill"><input type="radio" name="numToggle" value="off" checked> Desactive</label>
+        <label class="pill"><input type="radio" name="numToggle" value="on"> Active</label>
+      </div>
+      <div id="numOpts" class="hidden">
+        <div class="field-row" style="margin-top:.3rem">
+          <div>
+            <span class="field-label">Position</span>
+            <select id="numPos">
+              <option value="tl">Haut gauche</option>
+              <option value="tr">Haut droite</option>
+              <option value="bl">Bas gauche</option>
+              <option value="br" selected>Bas droite</option>
+              <option value="center">Centre</option>
+            </select>
+          </div>
+          <div>
+            <span class="field-label">Style</span>
+            <select id="numStyle">
+              <option value="white" selected>Blanc / Magenta</option>
+              <option value="magenta">Magenta / Blanc</option>
+              <option value="outline">Contour Magenta</option>
+            </select>
+          </div>
+        </div>
+        <span class="field-label" style="margin-top:.3rem">Debut a</span>
+        <input type="number" id="numStart" value="1" min="0" style="width:80px">
+      </div>
+    </div>
+  </div>
+
+  <!-- Export settings -->
+  <div class="card" id="cardExport">
+    <div class="card-header" onclick="toggleCard('cardExport')">
+      <h3><span class="card-ico">&#x2B07;</span> Export
+        <span class="card-help" onclick="event.stopPropagation()">?<span class="card-help-tip">Choisissez le <b>format</b> de sortie (JPEG, PNG, WebP) et le niveau de <b>qualite</b>. JPEG est ideal pour les photos, PNG pour la transparence et WebP pour le meilleur rapport qualite/poids.</span></span>
+      </h3>
+      <span class="card-toggle">&#x25BC;</span>
+    </div>
+    <div class="card-body">
+      <span class="field-label">Format</span>
+      <div class="pill-group" style="margin-bottom:.4rem">
+        <label class="pill"><input type="radio" name="exportFmt" value="jpeg" checked> JPEG</label>
+        <label class="pill"><input type="radio" name="exportFmt" value="png"> PNG</label>
+        <label class="pill"><input type="radio" name="exportFmt" value="webp"> WebP</label>
+      </div>
+      <span class="field-label">Qualite</span>
+      <div class="slider-row">
+        <input type="range" id="qualite" min="60" max="100" value="92">
+        <span class="slider-val" id="qualiteVal">92%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="card" id="cardKpi">
+    <div class="card-header" onclick="toggleCard('cardKpi')">
+      <h3><span class="card-ico">&#x1F4CA;</span> Informations
+        <span class="card-help" onclick="event.stopPropagation()">?<span class="card-help-tip">Affiche les <b>dimensions</b> reelles en pixels, megapixels, la taille physique et le DPI. L'indicateur de <b>qualite</b> vous aide a juger si la resolution est suffisante pour l'usage prevu (web, ecran, impression).</span></span>
+      </h3>
+      <span class="card-toggle">&#x25BC;</span>
+    </div>
+    <div class="card-body">
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-val" id="kpiPx">--</div>
+          <div class="kpi-label">Pixels</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpiMpx">--</div>
+          <div class="kpi-label">Megapixels</div>
+        </div>
+      </div>
+      <div class="kpi-row" style="margin-top:.35rem">
+        <div class="kpi">
+          <div class="kpi-val" id="kpiPhys">--</div>
+          <div class="kpi-label" id="kpiPhysLabel">Dimensions</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val" id="kpiDpi">150</div>
+          <div class="kpi-label">DPI</div>
+        </div>
+      </div>
+      <span class="field-label" style="margin-top:.45rem">Qualite estimee</span>
+      <div class="quality-bar"><div class="quality-fill" id="qualityFill"></div></div>
+      <div style="font-size:.58rem;color:var(--text-muted);margin-top:.15rem" id="qualityHint">--</div>
+    </div>
+  </div>
+
+  <!-- Ratio detector -->
+  <div class="card" id="cardRatio">
+    <div class="card-header" onclick="toggleCard('cardRatio')">
+      <h3><span class="card-ico">&#x1F50D;</span> Detecter ratio
+        <span class="card-help" onclick="event.stopPropagation()">?<span class="card-help-tip">Glissez une image pour <b>detecter son ratio</b> (ex. 16:9, 4:3, etc.). Utile si vos images ont le meme ratio mais que vous ne savez pas lequel : cela vous aide a choisir le bon mode dans la section <b>Mode</b> ci-dessus.</span></span>
+      </h3>
+      <span class="card-toggle">&#x25BC;</span>
+    </div>
+    <div class="card-body">
+      <div class="ratio-drop" id="ratioDropZone"
+        ondragover="event.preventDefault();this.style.borderColor='var(--magenta)'"
+        ondragleave="this.style.borderColor=''"
+        ondrop="handleRatioDrop(event)"
+        onclick="document.getElementById('ratioFile').click()">
+        <span>Glisser ou selectionner une image</span>
+      </div>
+      <input type="file" id="ratioFile" accept="image/*" style="display:none">
+      <div class="ratio-result hidden" id="ratioResult">
+        <div class="r-dim" id="ratioExact">--</div>
+        <div class="r-val" id="ratioNearest">--</div>
+        <div id="ratioApply"></div>
+      </div>
+    </div>
+  </div>
+
+</aside>
+
+<!-- ────────────── RIGHT PANEL ────────────── -->
+<main class="panel-right">
+
+  <!-- Dropzone -->
+  <div class="dropzone" id="dropzone">
+    <input type="file" id="fileInput" accept="image/*" multiple>
+    <div class="drop-icon">&#x1F5BC;</div>
+    <div class="drop-title">Deposez vos visuels ici</div>
+    <div class="drop-sub">JPG, PNG, WebP — Selection multiple acceptee</div>
+    <div class="drop-count" id="dropCount">0</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row hidden" id="statsRow">
+    <div class="stat"><div class="val" id="sNb">0</div><div class="lbl">Visuels</div></div>
+    <div class="stat"><div class="val" id="sRows">--</div><div class="lbl" id="sRowsLbl">Rangees</div></div>
+    <div class="stat"><div class="val" id="sCols">--</div><div class="lbl" id="sColsLbl">Par rangee</div></div>
+    <div class="stat"><div class="val" id="sFormat" style="font-size:.72rem">--</div><div class="lbl">Format</div></div>
+  </div>
+
+  <!-- Thumbnails -->
+  <div class="thumbs-card hidden" id="thumbsWrap">
+    <div class="thumbs-toolbar">
+      <div class="thumbs-toolbar-left">
+        <span class="thumbs-title">Visuels charges</span>
+        <button class="sort-btn active" data-sort="original" onclick="sortImages('original',this)">Original</button>
+        <button class="sort-btn" data-sort="name" onclick="sortImages('name',this)">A-Z</button>
+        <button class="sort-btn" data-sort="ratio" onclick="sortImages('ratio',this)">Ratio</button>
+        <button class="sort-btn" data-sort="size" onclick="sortImages('size',this)">Taille</button>
+      </div>
+      <button class="btn-clear" onclick="clearAllImages()">Tout supprimer</button>
+    </div>
+    <div class="thumbs-grid" id="thumbsGrid"></div>
+  </div>
+
+  <!-- Banner info -->
+  <div id="bannerCard" class="hidden"></div>
+
+  <!-- Optimal format -->
+  <div id="optimalRow" class="hidden">
+    <button class="btn-outline" onclick="calculerFormatOptimal()">
+      <span>&#x2726;</span> Calculer le format optimal
+    </button>
+    <div class="optimal-result hidden" id="optimalResult"></div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="btn-row hidden" id="btnRow">
+    <button class="btn btn-secondary" id="btnPreview" onclick="genererPreview()">&#x1F50D; Apercu rapide</button>
+    <button class="btn btn-primary" id="btnExport" onclick="genererExport()">&#x2B07; Generer &amp; telecharger</button>
+  </div>
+
+  <!-- Share row -->
+  <div class="share-row hidden" id="shareRow">
+    <button class="share-btn share-btn-native" onclick="shareNative()"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.99 2.99 0 0 0 18 8a3 3 0 1 0-3-3c0 .24.04.47.09.7L8.04 9.81A2.99 2.99 0 0 0 6 9a3 3 0 1 0 0 6c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65a2.93 2.93 0 0 0 2.92 2.92A2.93 2.93 0 0 0 21 19a2.93 2.93 0 0 0-3-2.92z"/></svg> Partager</button>
+    <button class="share-btn share-btn-copy" onclick="copyToClipboard()"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copier</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bg"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-lbl" id="progressLabel">0%</div>
+  </div>
+
+  <!-- Preview -->
+  <div id="previewWrap">
+    <div class="preview-card">
+      <div class="preview-toolbar">
+        <span class="preview-toolbar-label">Apercu</span>
+      </div>
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="previewCanvas"></canvas>
+        <div class="cell-overlays" id="cellOverlays"></div>
+        <div id="bdOverlay"></div>
+        <div class="bd-zoom-indicator" id="bdZoomIndicator">100%</div>
+      </div>
+    </div>
+    <div class="bd-canvas-bottom" id="bdCanvasBottom">
+      <!-- Zoom (tous modes) -->
+      <div class="zoom-group" id="bdZoomGroup">
+        <button class="zoom-btn bd-only-zoom" onclick="bd_zoomStep(-0.2)" title="Zoom arrière">−</button>
+        <button class="zoom-btn active" onclick="setZoom('fit',this)" title="Ajuster à la fenêtre">Ajuster</button>
+        <button class="zoom-btn" onclick="setZoom('50',this)">50%</button>
+        <button class="zoom-btn" onclick="setZoom('100',this)">100%</button>
+        <button class="zoom-btn bd-only-zoom" onclick="bd_zoomStep(0.2)" title="Zoom avant">+</button>
+      </div>
+      <!-- Info compacte -->
+      <div id="bdCanvasInfo" style="font-size:.58rem;color:var(--text-muted);flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+      <!-- Actions -->
+      <div style="display:flex;gap:.4rem;align-items:center;flex-shrink:0">
+        <button class="btn btn-secondary" id="bdBtnPreview" style="padding:.35rem .7rem;font-size:.7rem" onclick="genererPreview()">&#x1F50D; Aperçu</button>
+        <button class="btn btn-primary" id="bdBtnExport" style="padding:.35rem .7rem;font-size:.7rem" onclick="genererExport()">&#x2B07; Télécharger</button>
+        <button class="share-btn share-btn-copy" id="bdBtnCopy" style="padding:.35rem .6rem" onclick="copyToClipboard()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:.4rem">
+      <span style="font-size:.62rem;color:var(--text-muted);font-weight:500">Cliquez sur une image dans l'apercu pour ajuster son cadrage</span>
+    </div>
+    <div class="info-box" id="infoBox"></div>
+  </div>
+
+</main>
+
+<!-- ────────────── MEDIA PANEL (droite, toujours visible) ────────────── -->
+<aside class="bd-panel-media" id="bdPanelMedia">
+
+  <!-- Dropzone compacte (partagée tous modes) -->
+  <div class="dropzone-compact" id="bdDropzoneCompact">
+    <input type="file" id="bdFileInputCompact" accept="image/*" multiple>
+    <div class="drop-icon-sm">&#x1F5BC;</div>
+    <div class="drop-title-sm">Ajouter des visuels</div>
+    <div class="drop-sub-sm">JPG · PNG · WebP</div>
+    <div class="drop-count" id="bdDropCountCompact"></div>
+  </div>
+
+  <!-- Titre visuels + actions -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 .2rem">
+    <span style="font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)">Visuels</span>
+    <div style="display:flex;gap:.3rem;align-items:center">
+      <!-- Tri (mode standard uniquement) -->
+      <div id="mediaSortBtns" class="hidden" style="display:flex;gap:.15rem">
+        <button class="sort-btn active" data-sort="original" onclick="sortImages('original',this)" style="font-size:.5rem;padding:.1rem .3rem">Original</button>
+        <button class="sort-btn" data-sort="name" onclick="sortImages('name',this)" style="font-size:.5rem;padding:.1rem .3rem">A-Z</button>
+        <button class="sort-btn" data-sort="ratio" onclick="sortImages('ratio',this)" style="font-size:.5rem;padding:.1rem .3rem">Ratio</button>
+      </div>
+      <button class="btn-clear" style="font-size:.55rem" onclick="clearAllImages()">Tout supprimer</button>
+    </div>
+  </div>
+
+  <!-- Thumbnails verticaux -->
+  <div class="bd-thumbs-vertical" id="bdThumbsVertical">
+    <div style="font-size:.6rem;color:var(--text-muted);text-align:center;padding:.5rem">
+      Chargez des visuels pour les glisser dans les cases
+    </div>
+  </div>
+
+</aside>
+
+</div><!-- /app-shell -->
+
+<!-- ════════════════ CROP EDITOR MODAL ════════════════ -->
+<div id="cropModal" class="hidden">
+  <div class="crop-overlay" onclick="closeCropEditor()"></div>
+  <div class="crop-dialog">
+    <div class="crop-header">
+      <h3>Ajuster le cadrage <span class="crop-img-name" id="cropImgName"></span></h3>
+      <button class="crop-close" onclick="closeCropEditor()">&times;</button>
+    </div>
+    <div class="crop-viewport" id="cropViewport">
+      <img id="cropImg" draggable="false">
+      <div class="crop-hint">Glissez pour deplacer &middot; Molette pour zoomer</div>
+    </div>
+    <div class="crop-controls">
+      <span class="field-label">Zoom</span>
+      <input type="range" id="cropZoom" min="100" max="400" value="100" step="5">
+      <span class="crop-zoom-val" id="cropZoomVal">100%</span>
+      <div class="crop-actions">
+        <button class="crop-btn crop-btn-clear" onclick="clearSingleCrop()">Suppr. reglage</button>
+        <button class="crop-btn crop-btn-reset" onclick="resetCrop()">Reset</button>
+        <button class="crop-btn crop-btn-apply" onclick="applyCrop()">Appliquer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BD Context Menu -->
+<div id="bdContextMenu" class="hidden"></div>
+
+<!-- BD Templates Modal -->
+<div id="bdTemplateModal" class="hidden">
+  <div class="crop-overlay" onclick="bd_closeTemplateModal()"></div>
+  <div class="bd-tpl-dialog">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem">
+      <h3 style="font-size:.8rem;font-weight:700;color:var(--navy)" id="bdTplTitle">Templates de planche</h3>
+      <button class="crop-close" onclick="bd_closeTemplateModal()">&times;</button>
+    </div>
+    <p style="font-size:.62rem;color:var(--text-muted);margin-bottom:.5rem" id="bdTplDesc">Choisissez une disposition. Les images chargees seront assignees dans l'ordre.</p>
+
+    <!-- Mode page unique : grille classique -->
+    <div id="bdTplSingleMode">
+      <div class="bd-tpl-grid" id="bdTplGrid"></div>
+    </div>
+
+    <!-- Mode double page : sélection gauche/droite -->
+    <div id="bdTplSpreadMode" class="hidden">
+      <div style="display:flex;gap:.8rem;align-items:flex-start">
+        <!-- Page gauche -->
+        <div style="flex:1">
+          <div style="font-size:.65rem;font-weight:700;color:var(--magenta);margin-bottom:.4rem;text-align:center;padding:.3rem;background:var(--magenta-dim);border-radius:6px">&#x1F4D6; Page Gauche (P.1)</div>
+          <div class="bd-tpl-grid" id="bdTplGridLeft" style="grid-template-columns:repeat(3,1fr)"></div>
+        </div>
+        <!-- Séparateur -->
+        <div style="width:2px;background:var(--border);align-self:stretch;flex-shrink:0;margin-top:1.5rem"></div>
+        <!-- Page droite -->
+        <div style="flex:1">
+          <div style="font-size:.65rem;font-weight:700;color:var(--navy);margin-bottom:.4rem;text-align:center;padding:.3rem;background:var(--surface-alt);border-radius:6px">&#x1F4D6; Page Droite (P.2)</div>
+          <div class="bd-tpl-grid" id="bdTplGridRight" style="grid-template-columns:repeat(3,1fr)"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:.5rem;justify-content:center;margin-top:.8rem;flex-wrap:wrap">
+        <button class="btn btn-primary" id="bdTplApplySpread" onclick="bd_applySpreadTemplates()" style="padding:.45rem 1.2rem">Appliquer les 2 templates</button>
+        <button class="btn btn-secondary" id="bdTplApplyLeft" onclick="_bd_applySpreadSide('left')" style="padding:.35rem .8rem;font-size:.65rem" disabled>Gauche seule</button>
+        <button class="btn btn-secondary" id="bdTplApplyRight" onclick="_bd_applySpreadSide('right')" style="padding:.35rem .8rem;font-size:.65rem" disabled>Droite seule</button>
+      </div>
+      <div id="bdTplSpreadPreview" style="margin-top:.5rem;text-align:center;font-size:.58rem;color:var(--text-muted)"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner-ring"></div>
+  <div class="loading-text" id="loadingText">Chargement des images...</div>
+  <div class="loading-sub" id="loadingSub"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/src/app.js"></script>
+</html>
