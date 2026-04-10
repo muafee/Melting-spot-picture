@@ -9,3 +9,4 @@ import './styles/components.css';
 import './styles/crop.css';
 import './styles/bd.css';
 import './styles/responsive.css';
+import './app.js';
